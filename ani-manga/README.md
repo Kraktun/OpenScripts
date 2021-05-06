@@ -37,3 +37,9 @@ rm /data/local/tmp/tachiyomi.db
 
 You can parse different batches of manga, but you have to load the results to the db (or add the ids to the skip list) because the download function reads always from the database.  
 (I.e. after each ```python dex_migrate.py``` without ```-l``` you must run a ```python dex_migrate.py -l mangadex_tc_xxxxx.json```)
+
+### Notes
+
+Manga with a short name almost always fail.  
+I suggest to keep a high distance for the first pass (0.7 or 0.8). For my library (about 600 entries) around 90% are correct, and 10% a miss (2 were wrong).  
+Then use a second pass with a low distance (0.5) and manually check to avoid wrong results.

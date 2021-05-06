@@ -183,7 +183,7 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--load', type=str, help='Load the passed json fle overwriting the values in the database')
     parser.add_argument('-db', '--database', type=str, help='Specify tachiyomi database', default=TACHIYOMI_DB)
     parser.add_argument('-b', '--batch', type=int, help='Specify batch size', default=BATCH_SIZE)
-    parser.add_argument('-d', '--distance', type=int, help='Specify minimum distance between titles', default=MIN_DISTANCE)
+    parser.add_argument('-d', '--distance', type=float, help='Specify minimum distance between titles', default=MIN_DISTANCE)
 
     args = parser.parse_args()
     if args.load is None:

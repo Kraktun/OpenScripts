@@ -32,7 +32,7 @@ def download(database, batch_size, min_distance):
     cur = con.cursor()
     new_data = []
 
-    # to_skip keeps track of ids without a match, so it doesn't make sense to research them 
+    # to_skip keeps track of ids without a match, so it doesn't make sense to search them again
     # but if you want to try with a different regex or distance, you can remove them from the txt file 
     if os.path.isfile(SKIP_FILE):
         with open(SKIP_FILE) as f:
@@ -75,10 +75,9 @@ def download(database, batch_size, min_distance):
                 print(f"Waiting {WAIT_TIMER} seconds...")
                 time.sleep(WAIT_TIMER)
         if len(new_id) > 0:
-            # print(f"NEW ID: {new_id}\nNEW TITLE: {new_title}")
             print(f"NEW TITLE {round(distance, 2)}: {new_title}")
             new_data.append({
-                "source_title": title, # to check before loading in the db
+                "source_title": title, # to manually check before loading in the db
                 "new_title": new_title, 
                 "new_url": f'/manga/{new_id}', 
                 "new_thumbnail": THUMBNAIL, 

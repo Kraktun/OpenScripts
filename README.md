@@ -1,2 +1,4 @@
 # OpenScripts
-Some simple scripts
+
+Collection of standalone scripts.  
+Check each folder for info.

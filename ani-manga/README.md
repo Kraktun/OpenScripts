@@ -3,7 +3,7 @@
 ## dex_migrate
 
 Script used to migrate a tachiyomi database from the old mangadex API to the new one.  
-It simply updates the old url with the new values by searching each manga.  
+It simply updates the old url with the new value provided by the included db.  
 Requires **root** access.  
 
 To extract the db, from a command prompt
@@ -12,10 +12,10 @@ To extract the db, from a command prompt
 adb exec-out run-as eu.kanade.tachiyomi.debug cat databases/tachiyomi.db > tachiyomi.db
 ```
 
-then run the python script (e.g. with the first 100 successfull matches)
+then run the python script
 
 ```(bash)
-python dex_migrate.py -b 100
+python dex_migrate.py
 ```
 
 check that the matches are correct in the json file.  
@@ -35,11 +35,9 @@ cp /data/local/tmp/tachiyomi.db /data/data/eu.kanade.tachiyomi.debug/databases/t
 rm /data/local/tmp/tachiyomi.db
 ```
 
-You can parse different batches of manga, but you have to load the results to the db (or add the ids to the skip list) because the download function reads always from the database.  
-(I.e. after each ```python dex_migrate.py``` without ```-l``` you must run a ```python dex_migrate.py -l mangadex_tc_xxxxx.json```)
-
 ### Notes
 
-Manga with a short name almost always fail.  
-I suggest to keep a high distance for the first pass (0.7 or 0.8). For my library (about 600 entries) around 90% are correct, and 10% a miss (2 were wrong).  
-Then use a second pass with a low distance (0.5) and manually check to avoid wrong results.
+```mangadex.db``` is from [https://github.com/ivaniskandar/tachiyomi-mangadex-migrator/blob/main/app/src/main/assets/mangadex.db](https://github.com/ivaniskandar/tachiyomi-mangadex-migrator/blob/main/app/src/main/assets/mangadex.db)
+There is no licence attached, so I assume it's public domain.
+
+Chapter ids are not updated here, they are updated when you refresh the library (I don't know what happens with downloaded chapters).

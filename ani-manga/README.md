@@ -4,7 +4,7 @@
 
 Script used to migrate a tachiyomi database from the old mangadex API to the new one.  
 It simply updates the old url with the new value provided by the included db.  
-Requires **root** access.  
+Does not require **root** access, but requires debug (aka beta) version of tachiyomi.  
 
 To extract the db, from a command prompt
 
@@ -30,9 +30,14 @@ Send the db to the device (requires root)
 ```(bash)
 adb push tachiyomi.db /data/local/tmp/tachiyomi.db
 adb shell
-su
-cp /data/local/tmp/tachiyomi.db /data/data/eu.kanade.tachiyomi.debug/databases/tachiyomi.db
+run-as eu.kanade.tachiyomi.debug
+cd databases
+chmod 777 tachiyomi.db
+cp /data/local/tmp/tachiyomi.db .
+chmod 660 tachiyomi.db
+exit
 rm /data/local/tmp/tachiyomi.db
+exit
 ```
 
 ### Notes

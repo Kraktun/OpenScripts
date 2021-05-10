@@ -25,7 +25,7 @@ Load the changes to the db (use the correct filename)
 python dex_migrate.py -l mangadex_tc_xxxxx.json
 ```
 
-Send the db to the device (requires root)
+Send the db to the device
 
 ```(bash)
 adb push tachiyomi.db /data/local/tmp/tachiyomi.db

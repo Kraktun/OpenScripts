@@ -1,0 +1,122 @@
+# prefer epub
+.epub
+J-Novel
+Yen Press
+Premium
+Premium-Kobo
+J-Novel Club
+VIZ
+KindleHQ
+Kindle-Kobo
+Kobo
+Kindle
+
+# in no particular order
+Square Enix
+iBooks
+Sol Press
+WebNovelConverter
+Alma Books
+Seven Seas
+Bento Books
+One Peace Books
+Digital Manga Guild
+Chikuma
+Stone Bridge Press
+Kodansha
+Del Rey
+WordExcerpt
+Constable & Robinson
+Henry Holt
+Breakthrough Bandwagon Books
+BookWalker
+Locked Room
+Meteor Strike
+Oxford
+GL Bunko
+Google Play
+New Directions Publishing
+Tokyo Otaku Mode
+Tentai Books
+Digital Manga Publishing
+Penguin Books
+Impress Corporation
+Cross Infinite World
+Adelaide
+HarperCollins
+Tuttle
+Vertical
+Vintage Books
+Baka-Tsuki+Yen Press
+Dover Publications
+Windmill Books
+Bookish
+Scholastic
+
+# mobi
+.mobi
+
+# pdf
+.pdf
+Premium_Kitzoku
+Kindle-Kobo_Kitzoku
+Kobo_Kitzoku
+Kobo_Kiri
+KindleHQ_Kitzoku
+Kindle-Kobo_Kiri
+Kindle_Kitzoku
+Kindle_Kiri
+iBooks_Kitzoku
+
+Steam
+Idea Factory
+
+Premium-Kobo_LNWNCentral
+Premium_LNWNCentral
+KindleHQ_LNWNCentral
+Kindle-Kobo_LNWNCentral
+Kobo_LNWNCentral
+iBooks_LNWNCentral
+Adelaide_LNWNCentral
+WebNovelConverter_LNWNCentral
+Bookish_LNWNCentral
+Kindle_LNWNCentral
+Google Play_LNWNCentral
+
+# pdf from ocr
+OCR_chocolatkey_LNWNCentral
+OCR_Ozymandias_LNWNCentral
+OCR_bryan19_LNWNCentral
+OCR_anon_LNWNCentral
+OCR_Samachan_LNWNCentral
+OCR_NanoDesu Illustrations_LNWNCentral
+OCR_LNWNCentral
+
+# images from ocr
+Tokyopop
+Bandai Visual
+OCR_Compressed
+Scans_Compressed
+OCR_Samachan
+OCR_NanoDesu Illustrations
+OCR_Mamue
+OCR_bry19an
+OCR_chocolatkey
+OCR_Ozymandias
+OCR_anon
+OCR_Nyaa
+Scans_bry19an
+OCR
+Scans
+OCR_No Images
+OCR_Raw Illustrations
+
+.cbr
+Amano Yoshitaka_Dark Horse
+Dark Horse
+
+.zip
+.rtf
+
+
+Unknown

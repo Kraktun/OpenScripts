@@ -73,7 +73,7 @@ def ask_yn_question(question):
 
 def main():
     # folders must be organized in this form:
-    # TARGET_FOLDER / AUTHOR_NAME / ALBUM_NAME / *.m4a,*.mp3
+    # TARGET_FOLDER / AUTHOR_NAME / ALBUM_NAME / *.m4a
     
     # ask for the folder
     target_folder = input("Enter the target folder:\n")

@@ -4,14 +4,27 @@ from pathlib import Path
 
 def ext_selection():
     out_exts = ["jpg", "png"]
-    o_ext = input(f"Choose output extension: {out_exts}\n")
-    if not o_ext in out_exts:
+    print(f"Choose output extension:")
+    for i,e in enumerate(out_exts):
+        print(f"{i} - {e}")
+    o_ext = input()
+    if not o_ext.isnumeric() or int(o_ext) > len(out_exts):
         print("Invalid output")
         return ext_selection()
-    return o_ext
+    return out_exts[int(o_ext)]
+
+def get_float(strg):
+    while True:
+        expected_float = input(strg)
+        try:
+            return float(expected_float)
+        except:
+            print("Invalid value.")
 
 def main():
     target_folder = input("Enter the target folder\\file:\n")
+    print()
+    target_red = get_float("Enter the target reduction:\n")
     print()
     exts = ['.jpg', '.jpeg', '.png']
 
@@ -44,14 +57,14 @@ def main():
     for fl in target_files:
         print(f"[{counter}/{len(target_files)}]\tProcessing {fl}")
         s_image  = Image.open(target_folder / fl)
-        out_image = Image.new(s_image.mode, s_image.size)
-        out_image.putdata(s_image.getdata())
+        out_size = [int(fl*target_red) for fl in s_image.size]
+        out_image = s_image.resize(out_size, Image.ANTIALIAS)
         if out_extension == ".png":
-            out_image.save(out_dir / f"{Path(fl).stem}.png", format="PNG", compress_level=9)
+            out_image.save(out_dir / f"{Path(fl).stem}_lr.png", format="PNG", compress_level=9)
         elif out_extension == ".jpg":
-            out_image.save(out_dir / f"{Path(fl).stem}.jpg", format="JPEG", quality=95)
+            out_image.save(out_dir / f"{Path(fl).stem}_lr.jpg", format="JPEG", quality=95)
         else:
-            out_image.save(out_dir / f"{Path(fl).stem}{out_extension}")
+            out_image.save(out_dir / f"{Path(fl).stem}_lr{out_extension}")
         counter = counter+1
         
     print("\nDone")

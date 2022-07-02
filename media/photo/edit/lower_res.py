@@ -6,6 +6,8 @@ import argparse
 ACCEPTED_EXTENSIONS = [".jpg", ".png"]
 VALID_INPUT_EXTENSIONS = ['.jpg', '.jpeg', '.png']
 
+# note that exif info is not preserved
+
 def ext_selection():
     print(f"Choose output extension:")
     for i,e in enumerate(ACCEPTED_EXTENSIONS):
@@ -41,6 +43,8 @@ def parse_size(size):
     try:
         width = int(width)
         height = int(height)
+        if width < 1 or height < 1:
+            return None
         return (width, height)
     except:
         return None
@@ -53,6 +57,7 @@ def main():
     # if both ratio and size are defined, size is used
     parser.add_argument('--target-size', '-ts', help='Set a common target size for all images defined as "width"x"height" (without quotes)', type=str)
     parser.add_argument('--output-extension', '-oe', help='Output extension for the image(s)', type=str)
+    parser.add_argument('--output-folder', '-of', help='Output folder for the processed image(s)', type=str)
     args = parser.parse_args()
 
     if args.target_folder:
@@ -129,7 +134,10 @@ def main():
         print("No files to process.")
         return
 
-    out_dir = target_folder / "processed"
+    if args.output_folder:
+        out_dir = Path(args.output_folder)
+    else:
+        out_dir = target_folder / "processed"
     out_dir.mkdir(exist_ok=True)
 
     print()
@@ -139,15 +147,18 @@ def main():
         s_image  = Image.open(target_folder / fl)
         if use_ratio:
             out_size = [int(fl*target_red) for fl in s_image.size]
+            out_append_name = f"r{target_red}"
         else:
             out_size = target_size
+            out_append_name = f"s{target_size[0]}x{target_size[1]}"
         out_image = s_image.resize(out_size, Image.ANTIALIAS)
+        out_file = out_dir / f"{Path(fl).stem}_[{out_append_name}]{out_extension}"
         if out_extension == ".png":
-            out_image.save(out_dir / f"{Path(fl).stem}_lr.png", format="PNG", compress_level=9)
+            out_image.save(out_file, format="PNG", compress_level=9)
         elif out_extension == ".jpg":
-            out_image.save(out_dir / f"{Path(fl).stem}_lr.jpg", format="JPEG", quality=95)
+            out_image.save(out_file, format="JPEG", quality=95)
         else:
-            out_image.save(out_dir / f"{Path(fl).stem}_lr{out_extension}")
+            out_image.save(out_file)
         counter = counter+1
         
     print("\nDone")

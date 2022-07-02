@@ -1,23 +1,48 @@
 from PIL import Image
 import os
 from pathlib import Path
+import argparse
+
+ACCEPTED_EXTENSIONS = [".jpg", ".png"]
+VALID_INPUT_EXTENSIONS = ['.jpg', '.jpeg', '.png']
 
 def ext_selection():
-    out_exts = ["jpg", "png"]
-    o_ext = input(f"Choose output extension: {out_exts}\n")
-    if not o_ext in out_exts:
-        print("Invalid output")
+    print(f"Choose output extension:")
+    for i,e in enumerate(ACCEPTED_EXTENSIONS):
+        print(f"{i} - {e}")
+    o_ext = input()
+    if not o_ext.isnumeric() or int(o_ext) > len(ACCEPTED_EXTENSIONS):
+        print("Invalid value")
         return ext_selection()
-    return o_ext
+    return ACCEPTED_EXTENSIONS[int(o_ext)]
 
 def main():
-    target_folder = input("Enter the target folder\\file:\n")
-    print()
-    exts = ['.jpg', '.jpeg', '.png']
+    parser = argparse.ArgumentParser(description='Remove hexif info from one or more images')
+    parser.add_argument('--target-folder', '-tf', help='File or folder containing the images(s)', type=str)
+    parser.add_argument('--output-folder', '-of', help='Output folder for the processed image(s)', type=str)
+    parser.add_argument('--output-extension', '-oe', help='Output extension for the image(s)', type=str)
+    args = parser.parse_args()
+
+    if args.target_folder:
+        target_folder = args.target_folder
+    else:
+        target_folder = input("Enter the target folder\\file:\n")
+        print()
+    
+    if args.output_extension:
+        out_extension = args.output_extension
+        if out_extension[0] != ".":
+            out_extension = "." + out_extension
+        if out_extension not in ACCEPTED_EXTENSIONS:
+            print("Invalid output extension argument.")
+            out_extension = ext_selection()
+    else:
+        out_extension = ext_selection()
+        print()
 
     if os.path.isfile(target_folder):
         target_folder_p = Path(target_folder)
-        if target_folder_p.suffix in exts:
+        if target_folder_p.suffix in VALID_INPUT_EXTENSIONS:
             target_files = [target_folder]
             target_folder = target_folder_p.parent
             print("Valid file detected")
@@ -25,7 +50,7 @@ def main():
             print("Invalid file detected")
             return
     else:
-        target_files = [f for f in os.listdir(target_folder) if any(f.endswith(ext) for ext in exts)]
+        target_files = [f for f in os.listdir(target_folder) if any(f.endswith(ext) for ext in VALID_INPUT_EXTENSIONS)]
         target_folder = Path(target_folder)
         print(f"Folder detected: {len(target_files)} files to process")
     
@@ -34,9 +59,11 @@ def main():
         return
     
     print()
-    out_extension = "." + ext_selection()
 
-    out_dir = target_folder / "processed"
+    if args.output_folder:
+        out_dir = Path(args.output_folder)
+    else:
+        out_dir = target_folder / "processed"
     out_dir.mkdir(exist_ok=True)
 
     print()

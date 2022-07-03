@@ -17,7 +17,7 @@ def ext_selection():
     return ACCEPTED_EXTENSIONS[int(o_ext)]
 
 def main():
-    parser = argparse.ArgumentParser(description='Remove hexif info from one or more images')
+    parser = argparse.ArgumentParser(description='Remove exif info from one or more images')
     parser.add_argument('--target-folder', '-tf', help='File or folder containing the images(s)', type=str)
     parser.add_argument('--output-folder', '-of', help='Output folder for the processed image(s)', type=str)
     parser.add_argument('--output-extension', '-oe', help='Output extension for the image(s)', type=str)

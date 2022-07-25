@@ -1,18 +1,22 @@
 config:
     sync_mode: "sync" # either copy or sync
+    arguments: "" # add optional arguments for rclone to all folders
 folders:
     # use this block if the drives have the folder in different paths
     - id: "my_unique_id"
+      arguments: "" # add optional arguments to a specific folder, note that they are joined with the global arguments and do not substitute them
       paths:
         # note that we assume that the first drive available is the most up to date (i.e will be the source for all the others)
         # note that all files in source folders are copied to target folder, i.e. if source is a/b/c and folder 'c' contains c1,c2,c3 (files or folders doesn't matter) and dest is d/e/f, after sync dest will have c1,c2,c3 in folder 'f' (so 'c' itself is not copied)
         - drive: "C" # use C only for the default drive in windows
           path: "Users\\my_name\\Downloads" # path to the folder to sync, remember to escape \\, or use /
+          arguments: "" # add optional arguments to a specific drive, note that they are joined with the global and folder arguments and do not substitute them
         - drive: "My super drive" # general name
           path: "Downloads"
     # use this block if the drives have the folder in the same path
     - id: "my_unique_id2"
       path: "common/path" # common path for all drives
+      arguments: "" # add optional arguments to a specific folder, note that they are joined with the global arguments and do not substitute them
       drives:
         - "My drive 1" # drive names
         - "My drive 2"

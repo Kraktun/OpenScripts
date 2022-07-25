@@ -9,6 +9,8 @@ def execute_command(command_with_args, silent=False, return_output=False, shell=
             output_lines.append(line)
             if not silent:
                 print(line, end='')
+        for line in proc.stderr:
+            print(line, end='')
 
     if proc.returncode != 0:
         raise subprocess.CalledProcessError(proc.returncode, proc.args)

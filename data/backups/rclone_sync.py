@@ -16,6 +16,18 @@ def load_config(config_path):
         conf = yaml.safe_load(ff)
     return conf
 
+def load_key_or_default(dict, key, default=""):
+    if key in dict.keys():
+        return dict[key]
+    else:
+        return default
+
+def empty_list_on_empty_string(s, split_on=" "):
+    if s.strip() == "":
+        return []
+    else:
+        return s.split(split_on)
+
 def main():
     # load config
     parser = argparse.ArgumentParser(description='Sync utility')
@@ -37,6 +49,9 @@ def main():
     # get sync mode
     sync_mode = config_dic['config']['sync_mode']
     assert sync_mode in ['copy', 'sync'], "Invalid sync mode"
+    # get rclone global args
+    rclone_global_args = load_key_or_default(config_dic['config'], 'arguments', "")
+    rclone_global_args = empty_list_on_empty_string(rclone_global_args, split_on=" ")
 
     # list currently available drives
     curr_letters = drive_utils.list_drive_paths()
@@ -59,9 +74,16 @@ def main():
         print(f"\nSyncing id: {fold_id}")
         # drives with common path
         fold_has_common_paths = "path" in fold.keys()
+
         if fold_has_common_paths:
             # get common path
             fold_path = fold["path"]
+            # get arguments
+            rclone_args = load_key_or_default(fold, "arguments", default="")
+            rclone_args = empty_list_on_empty_string(rclone_args, split_on=" ")
+            rclone_final_args = rclone_global_args[:] # slice to make a copy
+            rclone_final_args.extend(rclone_args) 
+
             # list of the currently connected drives
             available_drives = []
             for fold_drive_name in fold["drives"]:
@@ -77,16 +99,28 @@ def main():
                     # build path of second to last drives
                     path_b = os.path.join(dr[1], fold_path)
                     print(f"Syncing drives: {available_drives[0][0]} -> {dr[0]}")
-                    process_utils.execute_command([rclone_exe, sync_mode, path_a, path_b])
+                    process_utils.execute_command([rclone_exe, sync_mode, path_a, path_b, *rclone_final_args])
             else:
                 print(f"Less than two drives available, skipping.")
+
         else:
             # distinct paths
             paths_list = fold["paths"]
+            # get arguments
+            rclone_args = load_key_or_default(fold, "arguments", default="")
+            rclone_args = empty_list_on_empty_string(rclone_args, split_on=" ")
+            rclone_path_args = rclone_global_args[:] # slice to make a copy
+            rclone_path_args.extend(rclone_args) 
+
             available_drives_path = []
             for path in paths_list:
                 drive_name = path["drive"]
                 drive_path = path["path"]
+                rclone_drive_args = load_key_or_default(path, "arguments", default="")
+                rclone_drive_args = empty_list_on_empty_string(rclone_drive_args, split_on=" ")
+                rclone_final_args = rclone_path_args[:]
+                rclone_final_args.extend(rclone_drive_args)
+
                 # check if drive is present
                 drive_connected = [d[0] for d in curr_drives if d[1] == drive_name]
                 if len(drive_connected) > 0:
@@ -99,7 +133,7 @@ def main():
                     # build path of second to last drives
                     path_b = os.path.join(dr[1], dr[2])
                     print(f"Syncing drives: {available_drives_path[0][0]} -> {dr[0]}")
-                    process_utils.execute_command([rclone_exe, sync_mode, path_a, path_b])
+                    process_utils.execute_command([rclone_exe, sync_mode, path_a, path_b, *rclone_final_args])
             else:
                 print(f"Less than two drives available, skipping.")
     print()

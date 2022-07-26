@@ -5,6 +5,7 @@ folders:
     # use this block if the drives have the folder in different paths
     - id: "my_unique_id"
       arguments: "" # add optional arguments to a specific folder, note that they are joined with the global arguments and do not substitute them
+      overwrite_mode: "copy" # optional setting to overwrite the current sync mode for this folder
       paths:
         # note that we assume that the first drive available is the most up to date (i.e will be the source for all the others)
         # note that all files in source folders are copied to target folder, i.e. if source is a/b/c and folder 'c' contains c1,c2,c3 (files or folders doesn't matter) and dest is d/e/f, after sync dest will have c1,c2,c3 in folder 'f' (so 'c' itself is not copied)

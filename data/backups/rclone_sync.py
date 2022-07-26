@@ -16,8 +16,12 @@ def load_config(config_path):
         conf = yaml.safe_load(ff)
     return conf
 
-def load_key_or_default(dict, key, default=""):
+def load_key_or_default(dict, key, default="", ignore_empty=False):
     if key in dict.keys():
+        val = dict[key]
+        # return default if it is not a number and is either an empty string or an empty list
+        if ignore_empty and not (type(val) == int or type(val) == float) and (len(dict[key])==0):
+            return default
         return dict[key]
     else:
         return default
@@ -85,6 +89,8 @@ def main():
             rclone_args = empty_list_on_empty_string(rclone_args, split_on=" ")
             rclone_final_args = rclone_global_args[:] # slice to make a copy
             rclone_final_args.extend(rclone_args)
+            # get optional overwrite mode
+            rclone_current_mode = load_key_or_default(fold, 'overwrite_mode', sync_mode, ignore_empty=True)
 
             # list of the currently connected drives
             available_drives = []
@@ -101,7 +107,7 @@ def main():
                     # build path of second to last drives
                     path_b = os.path.join(dr[1], fold_path)
                     print(f"Syncing drives: {available_drives[0][0]} -> {dr[0]}")
-                    process_utils.execute_command([rclone_exe, sync_mode, path_a, path_b, *rclone_final_args])
+                    process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args])
             else:
                 print(f"Less than two drives available, skipping.")
 
@@ -113,6 +119,8 @@ def main():
             rclone_args = empty_list_on_empty_string(rclone_args, split_on=" ")
             rclone_path_args = rclone_global_args[:] # slice to make a copy
             rclone_path_args.extend(rclone_args) 
+            # get optional overwrite mode
+            rclone_current_mode = load_key_or_default(fold, 'overwrite_mode', sync_mode, ignore_empty=True)
 
             available_drives_path = []
             for path in paths_list:
@@ -135,7 +143,7 @@ def main():
                     # build path of second to last drives
                     path_b = os.path.join(dr[1], dr[2])
                     print(f"Syncing drives: {available_drives_path[0][0]} -> {dr[0]}")
-                    process_utils.execute_command([rclone_exe, sync_mode, path_a, path_b, *rclone_final_args])
+                    process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args])
             else:
                 print(f"Less than two drives available, skipping.")
     print()

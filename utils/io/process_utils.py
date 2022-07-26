@@ -5,12 +5,15 @@ def execute_command(command_with_args, silent=False, return_output=False, shell=
     output_lines = []
     with subprocess.Popen(command_with_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
             universal_newlines=True, shell=shell, bufsize=1) as proc:
-        for line in proc.stdout:
-            output_lines.append(line)
-            if not silent:
+        (out, err) = proc.communicate() # use communicate or we may get a deadlock
+        if out is not None:
+            for line in out:
+                output_lines.append(line)
+                if not silent:
+                    print(line, end='')
+        if err is not None:
+            for line in err:
                 print(line, end='')
-        for line in proc.stderr:
-            print(line, end='')
 
     if proc.returncode != 0:
         raise subprocess.CalledProcessError(proc.returncode, proc.args)

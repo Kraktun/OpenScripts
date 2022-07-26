@@ -29,6 +29,7 @@ def empty_list_on_empty_string(s, split_on=" "):
         return s.split(split_on)
 
 def main():
+    print()
     # load config
     parser = argparse.ArgumentParser(description='Sync utility')
     parser.add_argument('--config', '-cfg', help='Path to the configuration file', type=str)
@@ -54,6 +55,7 @@ def main():
     rclone_global_args = empty_list_on_empty_string(rclone_global_args, split_on=" ")
 
     # list currently available drives
+    print("Collecting drive info. If there are network shares, it may take a while.")
     curr_letters = drive_utils.list_drive_paths()
     curr_drives = []
     for letter in curr_letters:
@@ -82,7 +84,7 @@ def main():
             rclone_args = load_key_or_default(fold, "arguments", default="")
             rclone_args = empty_list_on_empty_string(rclone_args, split_on=" ")
             rclone_final_args = rclone_global_args[:] # slice to make a copy
-            rclone_final_args.extend(rclone_args) 
+            rclone_final_args.extend(rclone_args)
 
             # list of the currently connected drives
             available_drives = []
@@ -91,7 +93,7 @@ def main():
                 fold_drive = [d[0] for d in curr_drives if d[1] == fold_drive_name]
                 if len(fold_drive) > 0:
                     # drive in config is currently connected
-                    available_drives.append((fold_drive_name, fold_drive))
+                    available_drives.append((fold_drive_name, fold_drive[0]))
             if len(available_drives) > 1:
                 # build path of first drive available
                 path_a = os.path.join(available_drives[0][1], fold_path)

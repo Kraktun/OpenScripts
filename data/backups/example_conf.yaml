@@ -1,6 +1,7 @@
 config:
     sync_mode: "sync" # either copy or sync
     arguments: "" # add optional arguments for rclone to all folders
+    output_file: "my_output_file.txt" # save output also to file, note that data is appended
 folders:
     # use this block if the drives have the folder in different paths
     - id: "my_unique_id"

@@ -13,6 +13,7 @@ def execute_command(command_with_args, silent=False, return_output=False, shell=
                     print(line, end='')
         if err is not None:
             for line in err:
+                output_lines.append(line)
                 print(line, end='')
 
     if proc.returncode != 0:

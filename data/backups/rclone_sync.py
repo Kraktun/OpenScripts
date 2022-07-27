@@ -57,6 +57,8 @@ def main():
     # get rclone global args
     rclone_global_args = load_key_or_default(config_dic['config'], 'arguments', "")
     rclone_global_args = empty_list_on_empty_string(rclone_global_args, split_on=" ")
+    # get output_file
+    output_file = load_key_or_default(config_dic['config'], 'output_file', None, ignore_empty=True)
 
     # list currently available drives
     print("Collecting drive info. If there are network shares, it may take a while.")
@@ -71,7 +73,7 @@ def main():
             curr_drives.append((letter, curr_name))
     
     print(f"Currently available drives (label: path):")
-    [print(f"{d[1]}: {d[0]}") for d in curr_drives]
+    [print(f"{d[1]:>15}:   {d[0]}") for d in curr_drives]
     input("\nPress Enter to continue\n")
     print()
 
@@ -80,6 +82,9 @@ def main():
         print(f"\nSyncing id: {fold_id}")
         # drives with common path
         fold_has_common_paths = "path" in fold.keys()
+        if output_file is not None:
+            with open(output_file, 'a') as of:
+                of.write(f"\nSyncing id: {fold_id}")
 
         if fold_has_common_paths:
             # get common path
@@ -107,9 +112,16 @@ def main():
                     # build path of second to last drives
                     path_b = os.path.join(dr[1], fold_path)
                     print(f"Syncing drives: {available_drives[0][0]} -> {dr[0]}")
-                    process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args])
+                    output_print = process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args], return_output=True)
+                    if output_file is not None:
+                        with open(output_file, 'a') as of:
+                            of.write(f"\nSyncing drives: {available_drives[0][0]} -> {dr[0]}\n")
+                            of.write("".join(output_print))
             else:
                 print(f"Less than two drives available, skipping.")
+                if output_file is not None:
+                    with open(output_file, 'a') as of:
+                        of.write("\nLess than two drives available, skipping.")
 
         else:
             # distinct paths
@@ -143,9 +155,16 @@ def main():
                     # build path of second to last drives
                     path_b = os.path.join(dr[1], dr[2])
                     print(f"Syncing drives: {available_drives_path[0][0]} -> {dr[0]}")
-                    process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args])
+                    output_print = process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args], return_output=True)
+                    if output_file is not None:
+                        with open(output_file, 'a') as of:
+                            of.write(f"\nSyncing drives: {available_drives_path[0][0]} -> {dr[0]}\n")
+                            of.write("".join(output_print))
             else:
                 print(f"Less than two drives available, skipping.")
+                if output_file is not None:
+                    with open(output_file, 'a') as of:
+                        of.write("\nLess than two drives available, skipping.")
     print()
 
 if __name__ == "__main__":

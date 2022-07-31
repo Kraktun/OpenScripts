@@ -4,12 +4,12 @@ import sys
 import argparse
 
 # add path to local libs
-abspath = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir))
+abspath = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir, os.pardir))
 dir_path = os.path.dirname(abspath)
 sys.path.insert(0, dir_path)
 
-from utils.io import drive_utils
-from utils.io import process_utils
+from common.io import drive_utils
+from common.io import process_utils
 
 def load_config(config_path):
     with open(config_path, 'r') as ff:

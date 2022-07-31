@@ -17,7 +17,7 @@ SKIP_FOLDERS = ["!Completed", "!EPUB", "!PDF"]
 def main(target_folder, mode, filters_file):
     """
     Main method: scan the input folder, filter the files according to the filters included
-        target_folder: string with the folder cotaining all the folders of the novels (structure must be target_folder/Novel_A/Volume_1.pdf)
+        target_folder: string with the folder containing all the folders of the novels (structure must be target_folder/Novel_A/Volume_1.pdf)
         mode: 'c' or 'm' for copy or move, symlinks will be added later
         filters_file: file with a list of tags in order of importance, such that if two files have the same name but different tags, the one 
             with the highest level tag (i.e. the one that appear earlier in filters_file) will be kept. If it is None, all files will be copied/moved.

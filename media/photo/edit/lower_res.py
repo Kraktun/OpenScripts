@@ -3,8 +3,8 @@ import os
 from pathlib import Path
 import argparse
 
-ACCEPTED_EXTENSIONS = [".jpg", ".png"]
-VALID_INPUT_EXTENSIONS = ['.jpg', '.jpeg', '.png']
+ACCEPTED_EXTENSIONS = [".jpg", ".png"] # i.e. extensions used to save the final file
+VALID_INPUT_EXTENSIONS = ['.jpg', '.jpeg', '.png'] # input file extensions
 
 # note that exif info is not preserved
 

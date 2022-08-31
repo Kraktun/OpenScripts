@@ -1,6 +1,6 @@
 config:
     sync_mode: "sync" # either copy or sync
-    arguments: " --transfers=1 --multi-thread-streams=0" # add optional arguments for rclone to all folders, arguments must include the -, e.g. --dry-run
+    arguments: "--local-no-sparse --modify-window=10ms --buffer-size=2G --drive-chunk-size=10G --transfers=1 --multi-thread-streams=0" # add optional arguments for rclone to all folders, arguments must include the -, e.g. --dry-run
     output_file: "Log_$datetime{%Y-%m-%d_%H%M%S}.txt" # save output also to file, note that data is appended, you can use the placeholder $datetime{} to set the current date and time, with the usual python strftime format (multiple placeholders in the filename are supported).
 folders:
     # use this block if the drives have the folder in different paths

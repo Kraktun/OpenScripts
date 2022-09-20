@@ -2,6 +2,7 @@ config:
     sync_mode: "sync" # either copy or sync
     arguments: "--local-no-sparse --modify-window=10ms --buffer-size=2G --drive-chunk-size=10G --transfers=1 --multi-thread-streams=0 --local-no-set-modtime" # add optional arguments for rclone to all folders, arguments must include the -, e.g. --dry-run
     output_file: "Log_$datetime{%Y-%m-%d_%H%M%S}.txt" # save output also to file, note that data is appended, you can use the placeholder $datetime{} to set the current date and time, with the usual python strftime format (multiple placeholders in the filename are supported).
+    extended_drive_search: false # set to true to scan also network drives, it will take longer.
 folders:
     # use this block if the drives have the folder in different paths
     - id: "my_unique_id"
@@ -15,6 +16,8 @@ folders:
           arguments: "" # add optional arguments to a specific drive, note that they are joined with the global and folder arguments and do not substitute them
         - drive: "My super drive" # general name
           path: "Downloads"
+        - drive: "*my_remote" # prepend a * to specify a rclone remote rather than a local drive. Note that it must be a valid remote created with `rclone config`.
+          path: "/some/path"
     # use this block if the drives have the folder in the same path
     - id: "my_unique_id2"
       path: "common/path" # common path for all drives
@@ -22,3 +25,4 @@ folders:
       drives:
         - "My drive 1" # drive names
         - "My drive 2"
+        - "*my_remote"

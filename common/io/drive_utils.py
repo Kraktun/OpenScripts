@@ -5,12 +5,12 @@ import psutil
 if is_windows():
     import win32api
 
-def list_drive_paths():
+def list_drive_paths(list_all=True):
     # if is_windows():
     #     drives = win32api.GetLogicalDriveStrings()
     #     drives = drives.split('\000')[:-1]
     #     return drives
-    drives = psutil.disk_partitions(all=True)
+    drives = psutil.disk_partitions(all=list_all)
     drives_paths = [d.mountpoint for d in drives if "cdrom" not in d.opts]
     return drives_paths
 

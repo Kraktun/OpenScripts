@@ -9,36 +9,41 @@ import datetime
 abspath = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir, os.pardir))
 dir_path = os.path.dirname(abspath)
 sys.path.insert(0, dir_path)
-
+# load local libs
 from common.io import drive_utils
 from common.io import process_utils
+from DriveObject import DriveObject
 
 DATE_TIME_REGEX = "\$datetime{(.*?)}"
-global OUTPUT_FILE
+global OUTPUT_FILE # path to the log file
 OUTPUT_FILE = None
 
 def load_config(config_path):
+    # load yaml configuration
     with open(config_path, 'r') as ff:
         conf = yaml.safe_load(ff)
     return conf
 
 def load_key_or_default(dict, key, default="", ignore_empty=False):
+    # given a dictionary, check if a key exists, if it exists return it, otherwise return the 'default' param
+    # if ignore_empty is true return the default parameter also if the key is present but is an empty string or list
     if key in dict.keys():
         val = dict[key]
-        # return default if it is not a number and is either an empty string or an empty list
-        if ignore_empty and not (type(val) == int or type(val) == float) and (len(dict[key])==0):
+        # return default if it is not a number or bool (bool is a subclass of int) and is either an empty string or an empty list
+        if ignore_empty and not isinstance(val, (int, float)) and (len(dict[key])==0):
             return default
         return dict[key]
     else:
         return default
 
 def empty_list_on_empty_string(s, split_on=" "):
-    if s.strip() == "":
-        return []
-    else:
-        return s.split(split_on)
+    # split a string on a given subset of characters
+    # if the string is empty return an empty list
+    return s.split(split_on) if s.strip() != "" else []
 
 def print_and_log(my_string, skip_stdout=False):
+    # print a string to stdout and write it to the global OUTPUT_FILE
+    # if skip_stdout is true, only write to OUTPUT_FILE
     if not skip_stdout: 
         print(my_string)
     if OUTPUT_FILE is not None:
@@ -51,14 +56,14 @@ def main():
     current_datetime = datetime.datetime.now()
     # load config
     parser = argparse.ArgumentParser(description='Sync utility')
-    parser.add_argument('--config', '-cfg', help='Path to the configuration file', type=str)
+    parser.add_argument('--config', '-cfg', help='Path to the script configuration file', type=str)
     parser.add_argument('--rclone_path', '-rp', help='Path to rclone executable if not in PATH', type=str)
     args = parser.parse_args()
 
     if args.config:
         config_path = args.config
     else:
-        config_path = input("Enter the path to the configuration file:\n")
+        config_path = input("Enter the path to the script configuration file:\n")
         print()
     config_dic = load_config(config_path)
 
@@ -69,11 +74,13 @@ def main():
     # get sync mode
     sync_mode = config_dic['config']['sync_mode']
     assert sync_mode in ['copy', 'sync'], "Invalid sync mode"
+    # get list all drives option
+    extended_list_drives = load_key_or_default(config_dic['config'], 'extended_drive_search', default=False, ignore_empty=True)
     # get rclone global args
-    rclone_global_args = load_key_or_default(config_dic['config'], 'arguments', "")
+    rclone_global_args = load_key_or_default(config_dic['config'], 'arguments', default="", ignore_empty=False)
     rclone_global_args = empty_list_on_empty_string(rclone_global_args, split_on=" ")
     # get output_file
-    OUTPUT_FILE = load_key_or_default(config_dic['config'], 'output_file', None, ignore_empty=True)
+    OUTPUT_FILE = load_key_or_default(config_dic['config'], 'output_file', default=None, ignore_empty=True)
     # check if placeholders are used for date and time
     if OUTPUT_FILE is not None:
         def replace_regex_with_format(match_obj):
@@ -86,7 +93,7 @@ def main():
     
     # list currently available drives
     print_and_log("Collecting drive info. If there are network shares, it may take a while.")
-    curr_letters = drive_utils.list_drive_paths()
+    curr_letters = drive_utils.list_drive_paths(list_all=extended_list_drives)
     curr_drives = []
     for letter in curr_letters:
         if letter == "C:\\":
@@ -118,25 +125,10 @@ def main():
             # get optional overwrite mode
             rclone_current_mode = load_key_or_default(fold, 'overwrite_mode', sync_mode, ignore_empty=True)
 
-            # list of the currently connected drives
-            available_drives = []
-            for fold_drive_name in fold["drives"]:
-                # tuple (name, letter)
-                fold_drive = [d[0] for d in curr_drives if d[1] == fold_drive_name]
-                if len(fold_drive) > 0:
-                    # drive in config is currently connected
-                    available_drives.append((fold_drive_name, fold_drive[0]))
-            if len(available_drives) > 1:
-                # build path of first drive available
-                path_a = os.path.join(available_drives[0][1], fold_path)
-                for dr in available_drives[1:]:
-                    # build path of second to last drives
-                    path_b = os.path.join(dr[1], fold_path)
-                    print_and_log(f"Syncing drives: {available_drives[0][0]} -> {dr[0]}")
-                    output_print = process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args], return_output=True)
-                    print_and_log("".join(output_print), skip_stdout=True)
-            else:
-                print_and_log(f"Less than two drives available, skipping.")
+            # list of the currently connected drives or remotes
+            available_drives = [DriveObject(fold_drive_name, curr_drives, path=fold_path) for fold_drive_name in fold["drives"]]
+
+            _process_available_drives(available_drives, rclone_exe, rclone_current_mode, rclone_final_args)
 
         else:
             # distinct paths
@@ -149,7 +141,8 @@ def main():
             # get optional overwrite mode
             rclone_current_mode = load_key_or_default(fold, 'overwrite_mode', sync_mode, ignore_empty=True)
 
-            available_drives_path = []
+            # list of the currently connected drives or remotes
+            available_drives = []
             for path in paths_list:
                 drive_name = path["drive"]
                 drive_path = path["path"]
@@ -158,23 +151,22 @@ def main():
                 rclone_final_args = rclone_path_args[:]
                 rclone_final_args.extend(rclone_drive_args)
 
-                # check if drive is present
-                drive_connected = [d[0] for d in curr_drives if d[1] == drive_name]
-                if len(drive_connected) > 0:
-                    # tuple name, letter, path
-                    available_drives_path.append((drive_name, drive_connected[0], drive_path))
-            if len(available_drives_path) > 1:
-                # build path of first drive available
-                path_a = os.path.join(available_drives_path[0][1], available_drives_path[0][2])
-                for dr in available_drives_path[1:]:
-                    # build path of second to last drives
-                    path_b = os.path.join(dr[1], dr[2])
-                    print_and_log(f"Syncing drives: {available_drives_path[0][0]} -> {dr[0]}")
-                    output_print = process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args], return_output=True)
-                    print_and_log("".join(output_print), skip_stdout=True)
-            else:
-                print_and_log(f"Less than two drives available, skipping.")
+                available_drives.append(DriveObject(drive_name, curr_drives, path=drive_path))
+
+            _process_available_drives(available_drives, rclone_exe, rclone_current_mode, rclone_final_args)
     print_and_log("")
+
+def _process_available_drives(available_drives, rclone_exe, rclone_current_mode, rclone_final_args):
+    if len(available_drives) > 1:
+        # no need to build the path: it is done at object initialization
+        path_a = available_drives[0].path 
+        for dr in available_drives[1:]:
+            path_b = dr.path
+            print_and_log(f"Syncing drives: {available_drives[0].drive_name} -> {dr.drive_name}")
+            output_print = process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args], return_output=True)
+            print_and_log("".join(output_print), skip_stdout=True)
+    else:
+        print_and_log(f"Less than two drives available, skipping.")
 
 if __name__ == "__main__":
     main()

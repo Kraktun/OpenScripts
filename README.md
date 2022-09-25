@@ -2,7 +2,10 @@
 
 Collection of standalone scripts.   
 Note that the `common` package is a shared library.   
-All scripts require Python 3.
+All python scripts require Python 3.
+
+The `linux` folder contains a collection of scripts used to install and configure some linux programs. They are usually used on arm boards (Armbian or Raspberry OS).
+Refer to the Readme in the folder for further instructions.
 
 ## App
 

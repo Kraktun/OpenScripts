@@ -102,6 +102,7 @@ def main():
             curr_name = drive_utils.get_name_by_drive_path(letter)
         if curr_name != "":
             curr_drives.append((letter, curr_name))
+    curr_names = [c[1] for c in curr_drives]
     
     print_and_log(f"\nCurrently available drives (label: path):")
     [print_and_log(f"{d[1]:>15}:   {d[0]}") for d in curr_drives]
@@ -126,7 +127,7 @@ def main():
             rclone_current_mode = load_key_or_default(fold, 'overwrite_mode', sync_mode, ignore_empty=True)
 
             # list of the currently connected drives or remotes
-            available_drives = [DriveObject(fold_drive_name, curr_drives, path=fold_path) for fold_drive_name in fold["drives"]]
+            available_drives = [DriveObject(drive_name, curr_drives, path=fold_path) for drive_name in curr_names if drive_name in fold["drives"]]
 
             _process_available_drives(available_drives, rclone_exe, rclone_current_mode, rclone_final_args)
 
@@ -151,7 +152,8 @@ def main():
                 rclone_final_args = rclone_path_args[:]
                 rclone_final_args.extend(rclone_drive_args)
 
-                available_drives.append(DriveObject(drive_name, curr_drives, path=drive_path))
+                if drive_name in curr_names:
+                    available_drives.append(DriveObject(drive_name, curr_drives, path=drive_path))
 
             _process_available_drives(available_drives, rclone_exe, rclone_current_mode, rclone_final_args)
     print_and_log("")

@@ -55,7 +55,7 @@ sudo chown root:$RESTIC_USER /home/$RESTIC_USER/bin/restic
 sudo chown $RESTIC_USER:root /home/$RESTIC_USER/restic/conf/*
 sudo chown $RESTIC_USER:root /home/$RESTIC_USER/restic/scripts/*
 sudo chmod 640 /home/$RESTIC_USER/restic/conf/*
-sudo chmod 640 /home/$RESTIC_USER/restic/scripts/*
+sudo chmod 740 /home/$RESTIC_USER/restic/scripts/*
 sudo usermod -a -G $RESTIC_HDD_GROUP $RESTIC_USER
 sudo mkdir -p $RESTIC_BACKUP_DIRECTORY
 sudo chown $RESTIC_USER:$RESTIC_HDD_GROUP $RESTIC_BACKUP_DIRECTORY

@@ -113,7 +113,7 @@ git_clone_folder () {
   # apply regex
   [[ $git_url =~ $REGEX_GET_FOLDER ]]
   # match 0 is the string, 1 is the first match
-  local git_main_folder=${BASH_REMATCH[1]}
+  local git_main_folder=${BASH_REMATCH[1]%.git}
   if [ ! -z "${target_branch}" ]; then
     git clone \
       --depth 1  \
@@ -124,7 +124,6 @@ git_clone_folder () {
   else
     git clone \
       --depth 1  \
-      # --no-single-branch \
       --filter=blob:none  \
       --sparse \
       $git_url

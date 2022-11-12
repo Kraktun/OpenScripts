@@ -6,6 +6,17 @@ Collection of bash scripts for common apps installation.
 
 This script contains a set of useful functions for different purposes. E.g. if you need to download only this folder rather than the whole repository you can use `git_clone_folder`.
 
+Try it with
+
+```bash
+source <(curl -sL https://raw.githubusercontent.com/Kraktun/OpenScripts/main/linux/libs.sh)
+# if process substitution does not work, use save and source
+# curl -sL https://raw.githubusercontent.com/Kraktun/OpenScripts/main/linux/libs.sh -o libs.sh
+# source libs.sh
+# rm libs.sh
+git_clone_folder https://github.com/Kraktun/OpenScripts linux 
+```
+
 ## Apps
 
 ### ffmpeg

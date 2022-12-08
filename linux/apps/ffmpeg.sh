@@ -34,12 +34,12 @@ local FFMPEG_CURRENT_DATE=`date +"%Y-%m-%d_%H%M"`
 local FFMPEG_LOG_FILE=$TEMP_FFMPEG_DIR/ffmpeg_log_$FFMPEG_CURRENT_DATE.log
 
 # install required dependencies
-sudo -q apt-get update
+sudo apt-get update >> /dev/null
 if [ "$FFMPEG_TARGET" = "raspi" ]; then
-	sudo -y -q apt-get install -y build-essential git autoconf automake cmake libtool
+	sudo apt-get install -y -q build-essential git autoconf automake cmake libtool >> /dev/null
 elif [ "$FFMPEG_TARGET" = "x64" ]; then
-	sudo -y -q apt-get install -y build-essential git autoconf automake cmake libtool libass-dev libfreetype6-dev libgnutls28-dev libmp3lame-dev libsdl2-dev \
-		libva-dev libvdpau-dev  libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev meson ninja-build pkg-config texinfo wget yasm zlib1g-dev libunistring-dev
+	sudo apt-get install -y -q build-essential git autoconf automake cmake libtool libass-dev libfreetype6-dev libgnutls28-dev libmp3lame-dev libsdl2-dev \
+		libva-dev libvdpau-dev  libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev meson ninja-build pkg-config texinfo wget yasm zlib1g-dev libunistring-dev >> /dev/null
 fi
 
 # set temporary dir

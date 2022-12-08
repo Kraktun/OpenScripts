@@ -132,3 +132,8 @@ git_clone_folder () {
   git sparse-checkout set $folder_to_download
   cd ..
 }
+
+get_date_string () {
+  local curr_date=`date +"%Y%m%d_%H%M%S"`
+  echo $curr_date
+}

@@ -104,7 +104,7 @@ if [ "$FFMPEG_TARGET" = "x64" ]; then
 	cd $TEMP_FFMPEG_DIR
 	echo "-----------------------------------------------------" | tee -a $FFMPEG_LOG_FILE
 	echo "Installing x265" | tee -a $FFMPEG_LOG_FILE
-	sudo apt install libnuma-dev
+	sudo apt-get install -y -q libnuma-dev >> /dev/null
 	wget -q -O x265.tar.bz2 https://bitbucket.org/multicoreware/x265_git/get/master.tar.bz2
 	tar xjf x265.tar.bz2
 	cd multicoreware*/build/linux

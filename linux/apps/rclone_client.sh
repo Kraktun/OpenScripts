@@ -11,9 +11,9 @@ set -eu
 # an encrypted password can be obtained with the command `openssl passwd -1 "my_password"`
 
 echo
-echo "#######################################"
-echo -e "\t\tInstalling rclone-client"
-echo "#######################################"
+echo_yellow "#######################################"
+echo_yellow "\t\tInstalling rclone-client"
+echo_yellow "#######################################"
 echo
 echo "Press ENTER to continue"
 read -p "" VAR
@@ -85,7 +85,7 @@ echo "sha1sum_command = none" >> $rclone_config_file
 echo "" >> $rclone_config_file
 
 echo
-echo "---------------------------------------"
-echo -e "\tInstallation complete"
-echo "---------------------------------------"
+echo_green "---------------------------------------"
+echo_green "\tInstallation complete"
+echo_green "---------------------------------------"
 echo

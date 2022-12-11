@@ -205,26 +205,26 @@ echo_color () {
 }
 
 echo_black () {
-  echo_color "black" $*
+  echo_color "black" "$*"
 }
 echo_red () {
-  echo_color "red" $*
+  echo_color "red" "$*"
 }
 echo_green () {
-  echo_color "green" $*
+  echo_color "green" "$*"
 }
 echo_yellow () {
-  echo_color "yellow" $*
+  echo_color "yellow" "$*"
 }
 echo_blue () {
-  echo_color "blue" $*
+  echo_color "blue" "$*"
 }
 echo_purple () {
-  echo_color "purple" $*
+  echo_color "purple" "$*"
 }
 echo_cyan () {
-  echo_color "cyan" $*
+  echo_color "cyan" "$*"
 }
 echo_white () {
-  echo_color "white" $*
+  echo_color "white" "$*"
 }

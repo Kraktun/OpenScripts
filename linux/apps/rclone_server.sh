@@ -13,9 +13,9 @@ set -eu
 # an encrypted password can be obtained with the command `openssl passwd -1 "my_password"`
 
 echo
-echo "#######################################"
-echo -e "\t\tInstalling rclone-server"
-echo "#######################################"
+echo_yellow "#######################################"
+echo_yellow "\t\tInstalling rclone-server"
+echo_yellow "#######################################"
 echo
 echo "Rclone will be installed with the following configuration:"
 echo -e "\tHDD GROUP:\t\t $RCLONE_HDD_GROUP"
@@ -48,7 +48,7 @@ create_keys () {
     echo "Creating keys"
     sudo -H -u $RCLONE_SERVER_USER bash -c 'cd $HOME && touch .ssh/authorized_keys && ssh-keygen -t rsa -b 4096 -f .ssh/id_rsa -N ""'
 }
-sudo do_file_exist "$RCLONE_SERVER_HOME_DIRECTORY/.ssh/id_rsa" do_nothing_function create_keys
+do_file_exist "$RCLONE_SERVER_HOME_DIRECTORY/.ssh/id_rsa" do_nothing_function create_keys
 echo "Setting up backup dir permissions"
 sudo chown root $RCLONE_SERVER_HOME_DIRECTORY
 sudo chmod 755 $RCLONE_SERVER_HOME_DIRECTORY
@@ -59,9 +59,9 @@ sudo sed -i 's_Subsystem\tsftp\t/usr/lib/openssh/sftp-server_#Subsystem\tsftp\t/
 sudo echo -e "Match Group $RCLONE_SFTP_LIMITED_GROUP\n  ChrootDirectory %h \n  ForceCommand internal-sftp \n  AllowTCPForwarding no \n  X11Forwarding no" >> /etc/ssh/sshd_config
 sudo service ssh restart
 echo
-echo "---------------------------------------"
-echo -e "\tInstallation complete"
-echo "---------------------------------------"
+echo_green "---------------------------------------"
+echo_green "\tInstallation complete"
+echo_green "---------------------------------------"
 echo
 echo "Now setup the client and add it to the authorized keys"
 echo

@@ -8,9 +8,9 @@ set -eu
 # Note that logs to stdout are currently not shown
 
 echo
-echo "#################################################"
-echo -e "\t FFMPEG with additional libs INSTALLATION"
-echo "#################################################"
+echo_yellow "#################################################"
+echo_yellow "\t FFMPEG with additional libs INSTALLATION"
+echo_yellow "#################################################"
 echo
 echo "Press ENTER to continue"
 read -p "" VAR
@@ -218,7 +218,7 @@ sudo make install >> $FFMPEG_LOG_FILE  2> >(tee -a $FFMPEG_LOG_FILE >&2)
 rm -rf $TEMP_FFMPEG_DIR/ffmpeg
 
 echo
-echo "-------------------------------------------------"
-echo -e "\tInstallation complete"
-echo "-------------------------------------------------"
+echo_green "-------------------------------------------------"
+echo_green "\tInstallation complete"
+echo_green "-------------------------------------------------"
 echo

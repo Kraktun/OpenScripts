@@ -16,9 +16,9 @@ set -eu
 # Must have a $SOURCE_CONFIG_FILE/nut/control_script.sh file and a $SOURCE_CONFIG_FOLDER/nut/msmtprc file.
 
 echo
-echo "#######################################"
-echo -e "\t\tInstalling nut-client"
-echo "#######################################"
+echo_yellow "#######################################"
+echo_yellow "\t\tInstalling nut-client"
+echo_yellow "#######################################"
 echo
 echo "Press ENTER to continue"
 read -p "" VAR
@@ -84,7 +84,7 @@ nut_ask_rewrite_email_service() {
 do_file_exist /etc/msmtprc nut_ask_rewrite_email_service nut_do_replace_config
 
 echo
-echo "---------------------------------------"
-echo -e "\tInstallation complete"
-echo "---------------------------------------"
+echo_green "---------------------------------------"
+echo_green "\tInstallation complete"
+echo_green "---------------------------------------"
 echo

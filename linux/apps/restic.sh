@@ -12,9 +12,9 @@ set -eu
 # currently supports only raspberry os 32bit and armbian64, populate the required RESTIC_ARCH for other architectures
 
 echo
-echo "#######################################"
-echo -e "\t\tInstalling restic"
-echo "#######################################"
+echo_yellow "#######################################"
+echo_yellow "\t\tInstalling restic"
+echo_yellow "#######################################"
 echo
 echo "Press ENTER to continue"
 read -p "" VAR
@@ -60,8 +60,9 @@ sudo usermod -a -G $RESTIC_HDD_GROUP $RESTIC_USER
 sudo mkdir -p $RESTIC_BACKUP_DIRECTORY
 sudo chown $RESTIC_USER:$RESTIC_HDD_GROUP $RESTIC_BACKUP_DIRECTORY
 echo
-echo "Main setup is complete"
+echo_green "---------------------------------------"
+echo_green "\tInstallation complete"
+echo_green "---------------------------------------"
 echo
 echo "Don't forget to initialize the repo"
 echo
-echo "-----------------------------------------------------"

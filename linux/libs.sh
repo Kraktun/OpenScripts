@@ -151,3 +151,79 @@ create_new_user () {
   echo "Generate ssh keys for user $m_new_user"
   sudo -H -u $m_new_user bash -c "ssh-keygen -t rsa -b 4096 -f /home/$m_new_user/.ssh/id_rsa -N ''"
 }
+
+load_colors () {
+  NO_COLOR='\033[0m'
+  COLOR_BLACK='\033[0;30m'
+  COLOR_RED='\033[0;31m'
+  COLOR_GREEN='\033[0;32m'
+  COLOR_YELLOW='\033[0;33m'
+  COLOR_BLUE='\033[0;34m'
+  COLOR_PURPLE='\033[0;35m'
+  COLOR_CYAN='\033[0;36m'
+  COLOR_WHITE='\033[0;37m'
+}
+
+echo_color () {
+  local color=$1
+  shift 1
+  local s="$@"
+  case $color in
+    "black")
+      local my_color=$COLOR_BLACK
+      ;;
+    "red")
+      local my_color=$COLOR_RED
+      ;;
+    "green")
+      local my_color=$COLOR_GREEN
+      ;;
+    "yellow")
+      local my_color=$COLOR_YELLOW
+      ;;
+    "blue")
+      local my_color=$COLOR_BLUE
+      ;;
+    "purple")
+      local my_color=$COLOR_PURPLE
+      ;;
+    "cyan")
+      local my_color=$COLOR_CYAN
+      ;;
+    "white")
+      local my_color=$COLOR_WHITE
+      ;;
+    "nc")
+      local my_color=$NO_COLOR
+      ;;
+    *)
+      local my_color=$NO_COLOR
+      ;;
+  esac
+  echo -e "${my_color}${s}${NO_COLOR}"
+}
+
+echo_black () {
+  echo_color "black" $*
+}
+echo_red () {
+  echo_color "red" $*
+}
+echo_green () {
+  echo_color "green" $*
+}
+echo_yellow () {
+  echo_color "yellow" $*
+}
+echo_blue () {
+  echo_color "blue" $*
+}
+echo_purple () {
+  echo_color "purple" $*
+}
+echo_cyan () {
+  echo_color "cyan" $*
+}
+echo_white () {
+  echo_color "white" $*
+}

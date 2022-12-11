@@ -2,6 +2,7 @@
 set -eu
 
 # needs the following variables set up
+# and libs.sh loaded
 
 # RCLONE_HDD_GROUP= # group that owns the backup directory (e.g. in a external disk)
 # RCLONE_SFTP_LIMITED_GROUP= # sftp group that is created with limited sftp access
@@ -43,8 +44,11 @@ sudo mkdir -p $RCLONE_SERVER_HOME_DIRECTORY/.local
 sudo chown $RCLONE_SERVER_USER:$RCLONE_HDD_GROUP $RCLONE_SERVER_HOME_DIRECTORY/.local
 sudo mkdir -p $RCLONE_SERVER_HOME_DIRECTORY/.cache
 sudo chown $RCLONE_SERVER_USER:$RCLONE_HDD_GROUP $RCLONE_SERVER_HOME_DIRECTORY/.cache
-echo "Creating keys"
-sudo -H -u $RCLONE_SERVER_USER bash -c 'cd $HOME && touch .ssh/authorized_keys && ssh-keygen -t rsa -b 4096 -f .ssh/id_rsa -N ""'
+create_keys () {
+    echo "Creating keys"
+    sudo -H -u $RCLONE_SERVER_USER bash -c 'cd $HOME && touch .ssh/authorized_keys && ssh-keygen -t rsa -b 4096 -f .ssh/id_rsa -N ""'
+}
+sudo do_file_exist "$RCLONE_SERVER_HOME_DIRECTORY/.ssh/id_rsa" do_nothing_function create_keys
 echo "Setting up backup dir permissions"
 sudo chown root $RCLONE_SERVER_HOME_DIRECTORY
 sudo chmod 755 $RCLONE_SERVER_HOME_DIRECTORY

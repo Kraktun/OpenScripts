@@ -5,6 +5,7 @@ set -eu
 # requires libs functions
 
 # needs the following variables set up
+# and libs.sh loaded
 
 # NUT_UPS_NAME= # Name of the ups
 # NUT_UPS_SERVER_IP= # Ip of the server with nut
@@ -12,7 +13,6 @@ set -eu
 # NUT_UPS_SLAVE_PASSWORD= # Password for the slave user
 # NUT_UPS_SHUTDOWN_SECONDS= # Time in seconds to wait before shutdown after power loss
 # SOURCE_CONFIG_FOLDER= # Folder with the config files
-# PATH_TO_LIBS= # Folder with the libs.sh file 
 # Must have a $SOURCE_CONFIG_FILE/nut/control_script.sh file and a $SOURCE_CONFIG_FOLDER/nut/msmtprc file.
 
 echo
@@ -22,9 +22,6 @@ echo "#######################################"
 echo
 echo "Press ENTER to continue"
 read -p "" VAR
-
-chmod u+x $PATH_TO_LIBS/libs.sh
-source $PATH_TO_LIBS/libs.sh
 
 # check if control script exist
 nut_control_not_exist() {

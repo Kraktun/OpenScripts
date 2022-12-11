@@ -52,8 +52,8 @@ sudo cp $SOURCE_CONFIG_FOLDER/restic/scripts/* /home/$RESTIC_USER/restic/scripts
 echo "Setting permissions"
 sudo chown $RESTIC_USER:$RESTIC_USER /home/$RESTIC_USER
 sudo chown root:$RESTIC_USER /home/$RESTIC_USER/bin/restic
-sudo chown $RESTIC_USER:root /home/$RESTIC_USER/restic/conf/*
-sudo chown $RESTIC_USER:root /home/$RESTIC_USER/restic/scripts/*
+sudo chown -R $RESTIC_USER:root /home/$RESTIC_USER/restic/conf
+sudo chown -R $RESTIC_USER:root /home/$RESTIC_USER/restic/scripts
 sudo chmod 640 /home/$RESTIC_USER/restic/conf/*
 sudo chmod 740 /home/$RESTIC_USER/restic/scripts/*
 sudo usermod -a -G $RESTIC_HDD_GROUP $RESTIC_USER

@@ -18,7 +18,6 @@ do_folder_exist () {
   local no_func=$3
   shift 3 # shift arguments
   local args="$@"
-  echo "SSS $args"
   if [ ! -d "$folder_to_check" ]; then
     $no_func $args
   else
@@ -77,18 +76,22 @@ ask_yes_no_function () {
   fi
 }
 
-do_nothing_function() {
+do_nothing_function () {
   sleep 0.01
 }
 
-enable_color_prompt() {
+enable_color_prompt () {
   local user=$1
-  sudo sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' /home/$user/.bashrc
+  sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' /home/$user/.bashrc
+}
+
+disable_home_share () {
+  sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
 }
 
 rename_bak_file() {
   local file_to_rename=$1
-  sudo mv "$file_to_rename" "${file_to_rename}.bak"
+  mv "$file_to_rename" "${file_to_rename}.bak"
 }
 
 backup_if_folder_exists () {
@@ -136,4 +139,15 @@ git_clone_folder () {
 get_date_string () {
   local curr_date=`date +"%Y%m%d_%H%M%S"`
   echo $curr_date
+}
+
+create_new_user () {
+  # create new user with pww and generate ssh key
+  local m_new_user=$1
+  local m_new_password=$2
+  echo "Creating $m_new_user user"
+  sudo useradd -m -s /bin/bash $m_new_user
+  echo $m_new_user:$m_new_password | sudo chpasswd -e
+  echo "Generate ssh keys for user $m_new_user"
+  sudo -H -u $m_new_user bash -c "ssh-keygen -t rsa -b 4096 -f /home/$m_new_user/.ssh/id_rsa -N ''"
 }

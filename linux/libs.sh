@@ -165,6 +165,7 @@ load_colors () {
 }
 
 echo_color () {
+  load_colors
   local color=$1
   shift 1
   local s="$@"

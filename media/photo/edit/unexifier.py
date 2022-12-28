@@ -71,6 +71,8 @@ def main():
     for fl in target_files:
         print(f"[{counter}/{len(target_files)}]\tProcessing {fl}")
         s_image  = Image.open(target_folder / fl)
+        if fl.endswith(".png") and out_extension == ".jpg":
+            s_image = s_image.convert('RGB')
         out_image = Image.new(s_image.mode, s_image.size)
         out_image.putdata(s_image.getdata())
         if out_extension == ".png":

@@ -33,7 +33,7 @@ def get_float(strg):
 
 def check_ratio(fl):
     # check if float provided is a valid ratio
-    return fl > 0 and fl < 1
+    return fl > 0 and fl <= 1
 
 def parse_size(size):
     if len(size.split("x")) < 2:

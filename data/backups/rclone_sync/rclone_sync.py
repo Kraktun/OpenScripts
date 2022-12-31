@@ -127,7 +127,7 @@ def main():
             rclone_current_mode = load_key_or_default(fold, 'overwrite_mode', sync_mode, ignore_empty=True)
 
             # list of the currently connected drives or remotes
-            available_drives = [DriveObject(drive_name, curr_drives, path=fold_path) for drive_name in curr_names if drive_name in fold["drives"]]
+            available_drives = [DriveObject(drive_name, curr_drives, path=fold_path) for drive_name in fold["drives"] if drive_name in curr_names]
 
             _process_available_drives(available_drives, rclone_exe, rclone_current_mode, rclone_final_args)
 

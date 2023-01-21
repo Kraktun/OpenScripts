@@ -49,6 +49,36 @@ do_file_exist () {
   fi
 }
 
+do_variable_exist () {
+  # call with var_to_check not set to the value, but to the name
+  # (e.g. if you want to check variable $SOMETHING, call it as `do_variable_exist SOMETHING func1 func2`)
+  local var_to_check=$1
+  local yes_func=$2
+  local no_func=$3
+  shift 3 # shift arguments
+  local args="$@"
+  if [ -z "${!var_to_check+x}" ]; then
+    echo $no_func $args
+  else
+    echo $yes_func $args
+  fi
+}
+
+do_variable_empty () {
+  # call with var_to_check not set to the value, but to the name, note that this works only if variable is set
+  local var_to_check=$1
+  local yes_func=$2
+  local no_func=$3
+  shift 3 # shift arguments
+  local args="$@"
+  if [ -z "${!var_to_check}" ]; then
+    echo $no_func $args
+  else
+    echo $yes_func $args
+  fi
+}
+
+
 # get id of a group
 get_group_id () {
   # call as my_var=`get_group_id my_group_name`

@@ -226,12 +226,11 @@ add_vlan_interface() {
     echo_red "Missing vlan number. Aborting."
     return
   fi
-  sudo echo "" >> /etc/network/interfaces.d/vlans
-  sudo echo >> /etc/network/interfaces.d/vlans
-  sudo echo "auto ${m_main_if}.${m_vlan}" >> /etc/network/interfaces.d/vlans
-  sudo echo "  iface ${m_main_if}.${m_vlan} inet dhcp" >> /etc/network/interfaces.d/vlans
-  sudo echo "  vlan-raw-device ${m_main_if}" >> /etc/network/interfaces.d/vlans
-  sudo echo "" >> /etc/network/interfaces.d/vlans
+  sudo echo >> /etc/network/interfaces.d/vlan${m_vlan}.conf
+  sudo echo "auto ${m_main_if}.${m_vlan}" >> /etc/network/interfaces.d/vlan${m_vlan}.conf
+  sudo echo "  iface ${m_main_if}.${m_vlan} inet dhcp" >> /etc/network/interfaces.d/vlan${m_vlan}.conf
+  sudo echo "  vlan-raw-device ${m_main_if}" >> /etc/network/interfaces.d/vlan${m_vlan}.conf
+  sudo echo "" >> /etc/network/interfaces.d/vlan${m_vlan}.conf
   sudo systemctl restart networking
 }
 

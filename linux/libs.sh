@@ -94,7 +94,7 @@ ask_yes_no_function () {
   local no_func=$3
   shift 3 # shift arguments
   local args="$@"
-  read -p "$message [y/n]" -r
+  read -p "$message [y/n]: " -r
   echo  
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     $yes_func $args
@@ -180,6 +180,26 @@ create_new_user () {
   echo $m_new_user:$m_new_password | sudo chpasswd -e
   echo "Generate ssh keys for user $m_new_user"
   sudo -H -u $m_new_user bash -c "ssh-keygen -t rsa -b 4096 -f /home/$m_new_user/.ssh/id_rsa -N ''"
+}
+
+get_missing_packages() {
+  # mainly from https://stackoverflow.com/a/48615797
+  # check if a list of packages is installed or not, return those that are not installed in a single string separated by a whitespace
+  # simply run as `get_missing_packages nano git curl`
+  local m_packages=$*
+  echo $(dpkg --get-selections $m_packages 2>&1 | grep -v ' install$' | awk '{ print $6 }'  | tr '\n' ' '  | xargs)
+}
+
+get_local_ip() {
+  # from https://stackoverflow.com/a/25851186
+  # get local ip of the main interface
+  echo $(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
+}
+
+get_main_interface() {
+  # get main interface name
+  local m_my_ip=$(get_local_ip)
+  echo $(ifconfig | grep -B1 $m_my_ip | grep -o "^\w*")
 }
 
 load_colors () {

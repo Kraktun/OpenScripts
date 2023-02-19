@@ -58,9 +58,9 @@ do_variable_exist () {
   shift 3 # shift arguments
   local args="$@"
   if [ -z "${!var_to_check+x}" ]; then
-    echo $no_func $args
+    $no_func $args
   else
-    echo $yes_func $args
+    $yes_func $args
   fi
 }
 
@@ -72,12 +72,26 @@ do_variable_empty () {
   shift 3 # shift arguments
   local args="$@"
   if [ -z "${!var_to_check}" ]; then
-    echo $no_func $args
+    $no_func $args
   else
-    echo $yes_func $args
+    $yes_func $args
   fi
 }
 
+do_sourced_file() {
+  # execute functions if current script has been sourced or not
+  # Note: if you want to exit in both cases, you should use `exit` for both func
+  # otherwise with return it will just return the current function and not the code that called it
+  local yes_func=$1
+  local no_func=$2
+  shift 2 # shift arguments
+  local args="$@"
+  if [[ "$0" == "$BASH_SOURCE" ]]; then
+    $no_func $args
+  else
+    $yes_func $args
+  fi
+}
 
 # get id of a group
 get_group_id () {
@@ -200,6 +214,25 @@ get_main_interface() {
   # get main interface name
   local m_my_ip=$(get_local_ip)
   echo $(ifconfig | grep -B1 $m_my_ip | grep -o "^\w*")
+}
+
+add_vlan_interface() {
+  # add a config file in /etc/network/interfaces.d/ called vlans
+  # that adds the provided vlan interface to the main interface of the system
+  # with dhcp address
+  local m_main_if=$(get_main_interface)
+  local m_vlan=$1 # number of the vlan subnet
+  if [ -z "${m_vlan}" ]; then
+    echo_red "Missing vlan number. Aborting."
+    return
+  fi
+  sudo echo "" >> /etc/network/interfaces.d/vlans
+  sudo echo >> /etc/network/interfaces.d/vlans
+  sudo echo "auto ${m_main_if}.${m_vlan}" >> /etc/network/interfaces.d/vlans
+  sudo echo "  iface ${m_main_if}.${m_vlan} inet dhcp" >> /etc/network/interfaces.d/vlans
+  sudo echo "  vlan-raw-device ${m_main_if}" >> /etc/network/interfaces.d/vlans
+  sudo echo "" >> /etc/network/interfaces.d/vlans
+  sudo systemctl restart networking
 }
 
 load_colors () {

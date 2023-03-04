@@ -2,6 +2,7 @@
 set -eu
 
 # needs the following variables set up
+# and libs.sh loaded
 
 # RCLONE_SERVER_ADDRESS= # ip address of the server
 # RCLONE_SERVER_USER= # user on the server to connect to with ssh
@@ -11,20 +12,20 @@ set -eu
 # an encrypted password can be obtained with the command `openssl passwd -1 "my_password"`
 
 echo
-echo_yellow "#######################################"
-echo_yellow "\t\tInstalling rclone-client"
-echo_yellow "#######################################"
+echo_purple "#######################################"
+echo_purple "\tInstalling rclone-client"
+echo_purple "#######################################"
 echo
-echo "Press ENTER to continue"
+echo_yellow "Press ENTER to continue"
 read -p "" VAR
 # create non root client user
-echo "Adding new user $RCLONE_CLIENT_USER"
+echo_yellow "Adding new user $RCLONE_CLIENT_USER"
 rclone_client_home=/home/$RCLONE_CLIENT_USER
 sudo useradd -s /bin/bash -m -d $rclone_client_home $RCLONE_CLIENT_USER
 echo $RCLONE_CLIENT_USER:$RCLONE_CLIENT_PASSWORD | sudo chpasswd -e
 
 # define folder where to store the key
-echo "Creating new key"
+echo_yellow "Creating new key"
 rclone_key_path=$rclone_client_home/certs/keys
 sudo mkdir -p $rclone_key_path
 sudo chown $RCLONE_CLIENT_USER:$RCLONE_CLIENT_USER $rclone_key_path
@@ -37,21 +38,21 @@ sudo chmod 0700 $rclone_key_path
 
 # ask to add the key to server authorized keys
 echo
-echo "Now add the following public key to your rclone server authorized keys"
+echo_yellow "Now add the following public key to your rclone server authorized keys"
 echo
 sudo cat $rclone_key_file.pub
 echo
-echo "Press ENTER to continue"
+echo_yellow "Press ENTER to continue"
 read -p "" VAR
 echo "-----------------------------------------------------"
 echo
 
-echo "Installing rclone"
+echo_yellow "Installing rclone"
 curl https://rclone.org/install.sh | sudo bash
 echo
 
 # attempt connection
-echo "Adding server to known hosts"
+echo_yellow "Adding server to known hosts"
 mkdir -p $rclone_client_home/.ssh
 sudo chmod 700 $rclone_client_home/.ssh
 touch $rclone_client_home/.ssh/known_hosts
@@ -60,20 +61,20 @@ sudo chown -R $RCLONE_CLIENT_USER:$RCLONE_CLIENT_USER $rclone_client_home/.ssh
 # add the server to the known hosts
 # not secure, but I assume you know what you are doing
 sudo -H -u $RCLONE_CLIENT_USER bash -c 'ssh-keyscan -H $0 >> $HOME/.ssh/known_hosts' "$RCLONE_SERVER_ADDRESS"
-echo "Attempting a connection to the server."
-echo "If it asks for a password, connection failed."
+echo_yellow "Attempting a connection to the server."
+echo_purple "If it asks for a password, connection failed."
 rclone_connection_result=`sudo -H -u $RCLONE_CLIENT_USER bash -c 'echo dir | sftp -i $0 $1@$2 | head -n 1' "$rclone_key_file" "$RCLONE_SERVER_USER" "$RCLONE_SERVER_ADDRESS"`
 echo 
 if [ "$rclone_connection_result" = "sftp> dir" ]; then
-    echo "Connection to server was successful"
+    echo_green "Connection to server was successful"
 else
-    echo "Connection to server failed"
+    echo_red "Connection to server failed"
     exit 1
 fi
 
 rclone_config_file=`sudo -H -u $RCLONE_CLIENT_USER bash -c 'rclone config file  | sed -n "2 p"'`
 echo
-echo "Press ENTER to write remote to config file: $rclone_config_file"
+echo_yellow "Press ENTER to write remote to config file: $rclone_config_file"
 read -p "" VAR
 echo "[$RCLONE_SERVER_NAME]" >> $rclone_config_file
 echo "type = sftp" >> $rclone_config_file

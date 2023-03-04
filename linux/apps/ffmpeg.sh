@@ -2,17 +2,18 @@
 set -eu
 
 # needs the following variables set up
+# and libs.sh loaded
 
 # FFMPEG_TARGET= # target device. Currently accepts: raspi, x64
 
 # Note that logs to stdout are currently not shown
 
 echo
-echo_yellow "#################################################"
-echo_yellow "\t FFMPEG with additional libs INSTALLATION"
-echo_yellow "#################################################"
+echo_purple "#################################################"
+echo_purple "\t FFMPEG with additional libs INSTALLATION"
+echo_purple "#################################################"
 echo
-echo "Press ENTER to continue"
+echo_yellow "Press ENTER to continue"
 read -p "" VAR
 
 # check target value
@@ -21,7 +22,7 @@ case $FFMPEG_TARGET in
   raspi|x64) 
 	echo "Target is $FFMPEG_TARGET" | tee -a $FFMPEG_LOG_FILE ;;
   *) 
-	echo "Invalid target device specified"
+	echo_red "Invalid target device specified"
 	return 1 ;;
 esac
 

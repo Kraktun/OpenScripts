@@ -2,6 +2,7 @@
 set -eu
 
 # needs the following variables set up
+# and libs.sh loaded
 
 # RESTIC_USER= # name of the user that will control restic
 # RESTIC_BACKUP_DIRECTORY= # directory that restic will have access to
@@ -12,11 +13,11 @@ set -eu
 # currently supports only raspberry os 32bit and armbian64, populate the required RESTIC_ARCH for other architectures
 
 echo
-echo_yellow "#######################################"
-echo_yellow "\t\tInstalling restic"
-echo_yellow "#######################################"
+echo_purple "#######################################"
+echo_purple "\tInstalling restic"
+echo_purple "#######################################"
 echo
-echo "Press ENTER to continue"
+echo_yellow "Press ENTER to continue"
 read -p "" VAR
 
 RESTIC_VERSION=`curl -sL https://api.github.com/repos/restic/restic/releases/latest | jq -r ".tag_name"`
@@ -34,7 +35,7 @@ echo
 echo "Restic version $RESTIC_VERSION and arch $RESTIC_ARCH will be installed with user $RESTIC_USER"
 echo "Backup folder is $RESTIC_BACKUP_DIRECTORY"
 echo
-echo "Press ENTER to continue"
+echo_yellow "Press ENTER to continue"
 read -p "" VAR
 
 sudo useradd -m $RESTIC_USER
@@ -42,14 +43,14 @@ sudo mkdir /home/$RESTIC_USER/bin
 sudo chown $RESTIC_USER:$RESTIC_USER /home/$RESTIC_USER/bin
 sudo -H -u $RESTIC_USER bash -c "curl -L https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_${RESTIC_ARCH}.bz2 | bunzip2 > /home/$RESTIC_USER/bin/restic"
 sudo chmod 750 /home/$RESTIC_USER/bin/restic
-echo "Copying credentials"
+echo_yellow "Copying credentials"
 sudo mkdir -p /home/$RESTIC_USER/restic/conf
 sudo chown $RESTIC_USER:root /home/$RESTIC_USER/restic
 sudo cp $SOURCE_CONFIG_FOLDER/restic/conf/* /home/$RESTIC_USER/restic/conf/
-echo "Copying scripts"
+echo_yellow "Copying scripts"
 sudo mkdir -p /home/$RESTIC_USER/restic/scripts
 sudo cp $SOURCE_CONFIG_FOLDER/restic/scripts/* /home/$RESTIC_USER/restic/scripts/
-echo "Setting permissions"
+echo_yellow "Setting permissions"
 sudo chown $RESTIC_USER:$RESTIC_USER /home/$RESTIC_USER
 sudo chown root:$RESTIC_USER /home/$RESTIC_USER/bin/restic
 sudo chown -R $RESTIC_USER:root /home/$RESTIC_USER/restic/conf
@@ -64,5 +65,5 @@ echo_green "---------------------------------------"
 echo_green "\tInstallation complete"
 echo_green "---------------------------------------"
 echo
-echo "Don't forget to initialize the repo"
+echo_yellow "Don't forget to initialize the repo"
 echo

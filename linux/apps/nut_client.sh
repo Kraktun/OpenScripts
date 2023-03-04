@@ -16,23 +16,23 @@ set -eu
 # Must have a $SOURCE_CONFIG_FILE/nut/control_script.sh file and a $SOURCE_CONFIG_FOLDER/nut/msmtprc file.
 
 echo
-echo_yellow "#######################################"
-echo_yellow "\t\tInstalling nut-client"
-echo_yellow "#######################################"
+echo_purple "#######################################"
+echo_purple "\t\tInstalling nut-client"
+echo_purple "#######################################"
 echo
-echo "Press ENTER to continue"
+echo_yellow "Press ENTER to continue"
 read -p "" VAR
 
 # check if control script exist
 nut_control_not_exist() {
-    echo "Nut control script not found. Aborting."
+    echo_red "Nut control script not found. Aborting."
     exit 1
 }
 do_file_exist $SOURCE_CONFIG_FOLDER/nut/control_script.sh do_nothing_function nut_control_not_exist
 
-echo "Installing package"
+echo_yellow "Installing package"
 sudo apt-get -y -q install nut-client
-echo "Configuring nut"
+echo_yellow "Configuring nut"
 # set mode to client
 sudo sed -i 's/MODE=none/MODE=netclient/' /etc/nut/nut.conf
 # apply monitoring config
@@ -56,14 +56,14 @@ sudo echo "AT ONBATT * START-TIMER onbattshutdown $NUT_UPS_SHUTDOWN_SECONDS" >> 
 sudo echo "AT ONLINE * CANCEL-TIMER onbattshutdown" >> /etc/nut/upssched.conf
 sudo echo "AT ONBATT * EXECUTE onbattwarn" >> /etc/nut/upssched.conf
 sudo echo "AT LOWBATT * EXECUTE onbattshutdownnow" >> /etc/nut/upssched.conf
-echo "Copying control script"
+echo_yellow "Copying control script"
 sudo mkdir -p /opt/nut/upssched
 sudo cp $SOURCE_CONFIG_FOLDER/nut/control_script.sh /opt/nut/upssched/
 sudo chmod g+x /opt/nut/upssched/control_script.sh
 sudo chmod g+rwx /opt/nut/upssched
 sudo chown -R root:nut /opt/nut/upssched
 
-echo "Configuring startup service"
+echo_yellow "Configuring startup service"
 # wait for network to be up
 sudo sed -i "s/After=local-fs.target network.target nut-server.service/After=local-fs.target network.target network-online.target nut-server.service\nWants=network-online.target/" /lib/systemd/system/nut-client.service
 # add a sleep to wait for the server to get ready if necessary
@@ -71,14 +71,14 @@ sudo sed -i 's_\[Service\]_\[Service\]\nExecStartPre=/bin/sleep 25_' /lib/system
 # remove requirement for password for nut user for shutdown command
 echo 'nut ALL=NOPASSWD:/usr/sbin/shutdown' | sudo EDITOR='tee -a' visudo
 
-echo "Configuring email service"
+echo_yellow "Configuring email service"
 sudo apt-get -y -q install msmtp msmtp-mta
 
 nut_do_replace_config() {
     sudo cp $SOURCE_CONFIG_FOLDER/nut/msmtprc /etc/msmtprc
 }
 nut_ask_rewrite_email_service() {
-    echo "A configuration file for the email service already exists in /etc/msmtprc."
+    echo_yellow "A configuration file for the email service already exists in /etc/msmtprc."
     ask_yes_no_function "Do you want to replace it?" nut_do_replace_config do_nothing_function
 }
 do_file_exist /etc/msmtprc nut_ask_rewrite_email_service nut_do_replace_config

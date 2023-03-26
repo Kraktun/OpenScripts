@@ -51,7 +51,7 @@ do_file_exist () {
 
 do_variable_exist () {
   # call with var_to_check not set to the value, but to the name
-  # (e.g. if you want to check variable $SOMETHING, call it as `do_variable_exist SOMETHING func1 func2`)
+  # (e.g. if you want to check variable $SOMETHING, call it as `do_variable_exist SOMETHING func1 func2` without the $)
   local var_to_check=$1
   local yes_func=$2
   local no_func=$3
@@ -65,7 +65,7 @@ do_variable_exist () {
 }
 
 do_variable_empty () {
-  # call with var_to_check not set to the value, but to the name, note that this works only if variable is set
+  # call with var_to_check not set to the value, but to the name, note that this works only if the variable is set
   local var_to_check=$1
   local yes_func=$2
   local no_func=$3
@@ -135,17 +135,41 @@ disable_home_share () {
 
 rename_bak_file() {
   local file_to_rename=$1
-  mv "$file_to_rename" "${file_to_rename}.bak"
+  local m_counter=$2
+  if [[ ( -z "$m_counter" ) || ( "$m_counter" == 0 ) ]] ; then
+    m_counter=""
+  fi
+  mv "$file_to_rename" "${file_to_rename}.bak${m_counter}"
 }
 
 backup_if_folder_exists () {
   local folder_to_check=$1
-  do_folder_exist $folder_to_check rename_bak_file do_nothing_function $folder_to_check
+  local m_counter=$2
+  do_folder_exist $folder_to_check rename_bak_file do_nothing_function $folder_to_check $m_counter
 }
 
 backup_if_file_exists () {
   local file_to_check=$1
-  do_file_exist $file_to_check rename_bak_file do_nothing_function $file_to_check
+  local m_counter=$2
+  do_file_exist $file_to_check rename_bak_file do_nothing_function $file_to_check $m_counter
+}
+
+incremental_backup_if_folder_exists () {
+  local m_folder_to_check=$1
+  local m_count=$2
+  if [[ -z "$m_counter" ]] ; then
+    m_counter="0"
+  fi
+  do_folder_exist $m_folder_to_check rename_bak_file incremental_backup_if_folder_exists $m_folder_to_check $((m_count+1))
+}
+
+incremental_backup_if_file_exists () {
+  local m_file_to_check=$1
+  local m_count=$2
+  if [[ -z "$m_counter" ]] ; then
+    m_counter="0"
+  fi
+  do_file_exist $m_file_to_check rename_bak_file incremental_backup_if_file_exists $m_file_to_check $((m_count+1))
 }
 
 git_clone_folder () {
@@ -204,6 +228,15 @@ get_missing_packages() {
   echo $(dpkg --get-selections $m_packages 2>&1 | grep -v ' install$' | awk '{ print $6 }'  | tr '\n' ' '  | xargs)
 }
 
+install_missing_packages() {
+  local m_packages=$*
+  m_packages=`get_missing_packages $m_packages`
+  if [ ! -z "$m_packages" ]; then
+    sudo apt-get -q update 
+    sudo apt install -y -q $m_packages
+  fi
+}
+
 get_local_ip() {
   # from https://stackoverflow.com/a/25851186
   # get local ip of the main interface
@@ -226,6 +259,7 @@ add_vlan_interface() {
     echo_red "Missing vlan number. Aborting."
     return
   fi
+  sudo mkdir -p /etc/network/interfaces.d
   echo "" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
   echo "auto ${m_main_if}.${m_vlan}" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
   echo "  iface ${m_main_if}.${m_vlan} inet dhcp" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
@@ -233,6 +267,35 @@ add_vlan_interface() {
   echo "" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
   sudo systemctl restart networking
 }
+
+
+add_vlan_interface_netplan() {
+  # for ubuntu > 18.04
+  # add vlan to config file in /etc/netplan/10-vlan-config.yaml
+  local m_main_if=$(get_main_interface)
+  local m_vlan=$1 # number of the vlan subnet
+  local m_subnet=$2 # subnet e.g. 192.168.1.0/24
+  sudo cp /etc/netplan/10-vlan-config.yaml  /etc/netplan/10-vlan-config.yaml
+  if [ -z "${m_vlan}" ]; then
+    echo_red "Missing vlan number. Aborting."
+    return
+  fi
+  echo """
+  vlans:
+    vlan.${m_vlan}:
+        id: ${m_vlan}
+        link: ${m_main_if}
+        dhcp4: yes
+  """ | sudo tee -a /etc/netplan/10-vlan-config.yaml > /dev/null
+  sudo netplan apply
+}
+
+
+source_support_libs() {
+  source <(curl -sL https://raw.githubusercontent.com/Kraktun/OpenScripts/main/linux/support/nginx.sh)
+  source <(curl -sL https://raw.githubusercontent.com/Kraktun/OpenScripts/main/linux/support/utility.sh)
+}
+
 
 load_colors () {
   NO_COLOR='\033[0m'

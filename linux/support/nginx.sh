@@ -23,7 +23,7 @@ nginx_copy_certs() {
         mkdir -p $m_dest_dir/$m_local_cert
         sudo cp -R $site_dir* $m_dest_dir/$m_local_cert/
         sudo chown -R root:root $m_dest_dir/$m_local_cert
-        sudo chmod 0644 $m_dest_dir/$m_local_cert/fullchain.pem
-        sudo chmod 0600 $m_dest_dir/$m_local_cert/privkey.pem
+        sudo chmod 0644 $m_dest_dir/$m_local_cert/*.crt
+        sudo chmod 0600 $m_dest_dir/$m_local_cert/*.key
     done
 }

@@ -139,7 +139,7 @@ rename_bak_file() {
   if [[ ( -z "$m_counter" ) || ( "$m_counter" == 0 ) ]] ; then
     m_counter=""
   fi
-  mv "$file_to_rename" "${file_to_rename}.bak${m_counter}"
+  sudo cp -r "$file_to_rename" "${file_to_rename}.bak${m_counter}"
 }
 
 backup_if_folder_exists () {
@@ -157,8 +157,8 @@ backup_if_file_exists () {
 incremental_backup_if_folder_exists () {
   local m_folder_to_check=$1
   local m_count=$2
-  if [[ -z "$m_counter" ]] ; then
-    m_counter="0"
+  if [[ ( -z "$m_count" ) || ( "$m_count" == 0 ) ]] ; then
+    m_count="-1"
   fi
   do_folder_exist $m_folder_to_check rename_bak_file incremental_backup_if_folder_exists $m_folder_to_check $((m_count+1))
 }
@@ -166,8 +166,8 @@ incremental_backup_if_folder_exists () {
 incremental_backup_if_file_exists () {
   local m_file_to_check=$1
   local m_count=$2
-  if [[ -z "$m_counter" ]] ; then
-    m_counter="0"
+  if [[ ( -z "$m_count" ) || ( "$m_count" == 0 ) ]] ; then
+    m_count="-1"
   fi
   do_file_exist $m_file_to_check rename_bak_file incremental_backup_if_file_exists $m_file_to_check $((m_count+1))
 }
@@ -275,18 +275,41 @@ add_vlan_interface_netplan() {
   local m_main_if=$(get_main_interface)
   local m_vlan=$1 # number of the vlan subnet
   local m_subnet=$2 # subnet e.g. 192.168.1.0/24
-  sudo cp /etc/netplan/10-vlan-config.yaml  /etc/netplan/10-vlan-config.yaml
+  local m_gateway=$3
+  local m_target_file="/etc/netplan/10-vlan-config.yaml"
+  if [ -z "${m_gateway}" ]; then
+    # default to subnet .1
+    m_gateway=${m_gateway::-4}1
+  fi
+  incremental_backup_if_file_exists $m_target_file
   if [ -z "${m_vlan}" ]; then
     echo_red "Missing vlan number. Aborting."
     return
   fi
+  m_append_network() {
+    if ! grep -Fxq "network:" $m_target_file; then
+      echo "network:" | sudo tee -a $m_target_file > /dev/null
+    fi
+  }
+  m_create_file() {
+    echo "network:" | sudo tee -a $m_target_file > /dev/null
+  }
+  do_file_exist $m_target_file m_append_network m_create_file
+  if ! grep -Fxq "  vlans:" $m_target_file; then
+    echo "  vlans:" | sudo tee -a $m_target_file > /dev/null
+  fi
   echo """
-  vlans:
     vlan.${m_vlan}:
         id: ${m_vlan}
         link: ${m_main_if}
         dhcp4: yes
-  """ | sudo tee -a /etc/netplan/10-vlan-config.yaml > /dev/null
+        dhcp4-overrides:
+          use-routes: false
+        routes:
+          - to: ${m_subnet}
+            via: ${m_gateway}
+            metric: 100
+  """ | sudo tee -a $m_target_file > /dev/null
   sudo netplan apply
 }
 

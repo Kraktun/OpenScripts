@@ -133,13 +133,31 @@ disable_home_share () {
   sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
 }
 
-rename_bak_file() {
-  local file_to_rename=$1
+run_as_root () {
+  # Note: currently works only with functions that do not execute other functions
+  local m_func_name=$1
+  shift
+  local m_func_cont=$(declare -f $m_func_name)
+  sudo bash -c "$m_func_cont; $m_func_name $*"
+}
+
+_get_pre_backup_name () {
+  local m_file=$1
+  echo "${m_file%.bak*[0-9]}"
+}
+
+_get_post_backup_name () {
+  local m_file=$1
   local m_counter=$2
   if [[ ( -z "$m_counter" ) || ( "$m_counter" == 0 ) ]] ; then
     m_counter=""
   fi
-  sudo cp -r "$file_to_rename" "${file_to_rename}.bak${m_counter}"
+  echo "${m_file}.bak${m_counter}"
+}
+ 
+rename_bak_file () {
+  local m_out_name=$(_get_post_backup_name $1 $2)
+  cp -r "$file_to_rename" "$m_out_name"
 }
 
 backup_if_folder_exists () {
@@ -158,18 +176,34 @@ incremental_backup_if_folder_exists () {
   local m_folder_to_check=$1
   local m_count=$2
   if [[ ( -z "$m_count" ) || ( "$m_count" == 0 ) ]] ; then
-    m_count="-1"
+    m_count="0"
   fi
-  do_folder_exist $m_folder_to_check rename_bak_file incremental_backup_if_folder_exists $m_folder_to_check $((m_count+1))
+
+  rename_from_source () {
+    local m_source_name=$(_get_pre_backup_name $1)
+    local m_m_count=$2
+    rename_bak_file $m_source_name $((m_m_count-1))
+  }
+
+  local m_target_name=$(_get_post_backup_name $m_folder_to_check $m_count)
+  do_folder_exist $m_target_name incremental_backup_if_file_exists rename_from_source $m_folder_to_check $((m_count+1))
 }
 
 incremental_backup_if_file_exists () {
   local m_file_to_check=$1
   local m_count=$2
   if [[ ( -z "$m_count" ) || ( "$m_count" == 0 ) ]] ; then
-    m_count="-1"
+    m_count="0"
   fi
-  do_file_exist $m_file_to_check rename_bak_file incremental_backup_if_file_exists $m_file_to_check $((m_count+1))
+
+  rename_from_source () {
+    local m_source_name=$(_get_pre_backup_name $1)
+    local m_m_count=$2
+    rename_bak_file $m_source_name $((m_m_count-1))
+  }
+
+  local m_target_name=$(_get_post_backup_name $m_file_to_check $m_count)
+  do_file_exist $m_target_name incremental_backup_if_file_exists rename_from_source $m_file_to_check $((m_count+1))
 }
 
 git_clone_folder () {
@@ -281,7 +315,9 @@ add_vlan_interface_netplan() {
     # default to subnet .1
     m_gateway=${m_gateway::-4}1
   fi
-  incremental_backup_if_file_exists $m_target_file
+  # TODO FIX BACKUP
+  #run_as_root incremental_backup_if_file_exists $m_target_file
+  sudo cp /etc/netplan/10-vlan-config.yaml /etc/netplan/10-vlan-config.yaml.bak
   if [ -z "${m_vlan}" ]; then
     echo_red "Missing vlan number. Aborting."
     return

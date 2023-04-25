@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# beware: currently I'm reusing variables in recursive calls, so if you run functions with as arguments
+# other functions of this script you may get weird/wrong results.
+
 
 # check if any folder passed as parameter exists
 check_folder_exist () {
@@ -64,17 +67,31 @@ do_variable_exist () {
   fi
 }
 
-do_variable_empty () {
+do_variable_non_empty () {
   # call with var_to_check not set to the value, but to the name, note that this works only if the variable is set
   local var_to_check=$1
   local yes_func=$2
   local no_func=$3
   shift 3 # shift arguments
   local args="$@"
-  if [ -z "${!var_to_check}" ]; then
-    $no_func $args
-  else
+  if [ ! -z "${!var_to_check}" ]; then
     $yes_func $args
+  else
+    $no_func $args
+  fi
+}
+
+do_variable_exist_non_empty () {
+  # call with var_to_check not set to the value, but to the name
+  local var_to_check=$1
+  local yes_func=$2
+  local no_func=$3
+  shift 3 # shift arguments
+  local args="$@"
+  if [ ! -z "${!var_to_check+x}" ] && [ ! -z "${!var_to_check}" ]; then
+    $yes_func $args
+  else
+    $no_func $args
   fi
 }
 
@@ -126,19 +143,45 @@ do_nothing_function () {
 
 enable_color_prompt () {
   local user=$1
-  sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' /home/$user/.bashrc
+  maybe_run_as_root sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' /home/$user/.bashrc
 }
 
 disable_home_share () {
-  sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
+  maybe_run_as_root sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
 }
 
-run_as_root () {
-  # Note: currently works only with functions that do not execute other functions
+_run_as_root () {
+  # Note: works only with functions that do not execute other functions
   local m_func_name=$1
   shift
+  local m_args=$*
   local m_func_cont=$(declare -f $m_func_name)
-  sudo bash -c "$m_func_cont; $m_func_name $*"
+  _is_function () {
+    sudo bash -c "$m_func_cont; $m_func_name $m_args"
+  }
+  _is_command () {
+    sudo $m_func_name $m_args
+  }
+  do_variable_non_empty m_func_cont _is_function _is_command
+}
+
+enable_run_as_root () {
+  M_RUN_AS_ROOT=1
+}
+
+disable_run_as_root () {
+  unset M_RUN_AS_ROOT
+}
+
+maybe_run_as_root () {
+  # prepend to any command (not function) you may need to run as root
+  # to actually run it as root you need to call `enable_run_as_root` right before it
+  local m_func_name=$1
+  shift
+  m_run_as_root_explicit_func () {
+    _run_as_root $m_func_name $@
+  }
+  do_variable_exist_non_empty M_RUN_AS_ROOT m_run_as_root_explicit_func $m_func_name $@
 }
 
 _get_pre_backup_name () {
@@ -157,7 +200,7 @@ _get_post_backup_name () {
  
 rename_bak_file () {
   local m_out_name=$(_get_post_backup_name $1 $2)
-  cp -r "$file_to_rename" "$m_out_name"
+  maybe_run_as_root cp -r "$1" "$m_out_name"
 }
 
 backup_if_folder_exists () {
@@ -315,8 +358,10 @@ add_vlan_interface_netplan() {
     # default to subnet .1
     m_gateway=${m_gateway::-4}1
   fi
-  # TODO FIX BACKUP
-  #run_as_root incremental_backup_if_file_exists $m_target_file
+  # Do a backup
+  enable_run_as_root
+  incremental_backup_if_file_exists $m_target_file
+  disable_run_as_root
   sudo cp /etc/netplan/10-vlan-config.yaml /etc/netplan/10-vlan-config.yaml.bak
   if [ -z "${m_vlan}" ]; then
     echo_red "Missing vlan number. Aborting."

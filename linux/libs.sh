@@ -97,13 +97,17 @@ do_variable_exist_non_empty () {
 
 do_sourced_file() {
   # execute functions if current script has been sourced or not
+  # You need to specify the source level, i.e. which is the script you want to know if it was sourced
+  # If for instance you want to know if the script that sourced this lib was itself sourced, you need to use level 1
+  # If you copied the func to your source script, then use level 0
   # Note: if you want to exit in both cases, you should use `exit` for both func
   # otherwise with return it will just return the current function and not the code that called it
-  local yes_func=$1
-  local no_func=$2
-  shift 2 # shift arguments
+  local source_level=$1
+  local yes_func=$2
+  local no_func=$3
+  shift 3 # shift arguments
   local args="$@"
-  if [[ "$0" == "$BASH_SOURCE" ]]; then
+  if [[ "$0" == "${BASH_SOURCE[$source_level]}" ]]; then
     $no_func $args
   else
     $yes_func $args

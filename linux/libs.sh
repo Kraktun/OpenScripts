@@ -151,6 +151,9 @@ enable_color_prompt () {
 }
 
 disable_home_share () {
+  enable_run_as_root
+  incremental_backup_if_file_exists /etc/adduser.conf
+  disable_run_as_root
   maybe_run_as_root sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
 }
 

@@ -43,9 +43,12 @@ echo_yellow "Installing package"
 sudo apt-get -y -q install nut
 
 echo_yellow "Configuring nut"
+sudo chown nut /etc/nut/*
+sudo /etc/init.d/nut-server restart
 echo
-echo_purple "Disabling auto-shutdown"
-sudo sed -i 's=/sbin/upsmon -K >/dev/null 2>&1 && /sbin/upsdrvctl shutdown=#/sbin/upsmon -K >/dev/null 2>&1 && /sbin/upsdrvctl shutdown=' /lib/systemd/system-shutdown/nutshutdown
+#echo_purple "Disabling auto-shutdown"
+# TODO UPDATE TO CURRENT VERSION
+#sudo sed -i 's=/sbin/upsmon -K >/dev/null 2>&1 && /sbin/upsdrvctl shutdown=#/sbin/upsmon -K >/dev/null 2>&1 && /sbin/upsdrvctl shutdown=' /lib/systemd/system-shutdown/nutshutdown
 
 echo_purple "Adding usb config"
 cat "$m_nut_usb_conf" | sudo tee -a /etc/nut/ups.conf
@@ -59,7 +62,7 @@ echo "LISTEN 127.0.0.1 3493" | sudo tee -a /etc/nut/upsd.conf
 echo "LISTEN $NUT_UPS_SERVER_IP 3493" | sudo tee -a /etc/nut/upsd.conf
 
 echo_yellow "Checking config"
-local ups_resp=$(upsc $NUT_UPS_NAME@localhost ups.status)
+ups_resp=$(upsc $NUT_UPS_NAME@localhost ups.status)
 if [[ $ups_resp = "OL" ]]
 then
     echo_green "Connection to ups service succeeded"
@@ -73,7 +76,7 @@ cat "$m_nut_users_conf" | sudo tee -a /etc/nut/upsd.users
 
 echo_purple "Writing shutdown logic"
 # apply monitoring config
-echo "RUN_AS_USER nut" >> /etc/nut/upsmon.conf
+echo "RUN_AS_USER nut" | sudo tee -a /etc/nut/upsmon.conf
 echo "MONITOR $NUT_UPS_NAME@localhost 1 $NUT_UPS_MASTER_USER $NUT_UPS_MASTER_PASSWORD master" | sudo tee -a /etc/nut/upsmon.conf
 echo "NOTIFYCMD /usr/sbin/upssched" | sudo tee -a /etc/nut/upsmon.conf
 echo "NOTIFYFLAG ONLINE SYSLOG+WALL+EXEC" | sudo tee -a /etc/nut/upsmon.conf

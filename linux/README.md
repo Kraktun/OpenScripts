@@ -53,6 +53,35 @@ case $1 in
 esac
 ```
 
+### Nut server
+
+Similar to Nut client, this is the server part. It requires also `usb.conf` and `users.conf` files.
+
+Example of `usb.conf`
+
+```conf
+[my_awesome_ups]
+    driver = "blazer_usb"
+    port = "auto"
+    vendorid = "0665"
+    productid = "5161"
+    bus = "006"
+    ignorelb
+    override.battery.charge.low = 30
+    override.battery.charge.warning = 50
+```
+
+Example of `users.conf`
+
+```conf
+[upsmaster]
+    password = my_super_password
+    upsmon master
+[upsslave]
+    password = my_less_super_password
+    upsmon slave
+```
+
 ### Rclone client
 
 Script to install [rclone](https://rclone.org/) as a client. The configuration is such that a single server exposes a limited sftp service so that multiple clients can connect to it and upload their files in predefined directories. Authentication is based on keys.

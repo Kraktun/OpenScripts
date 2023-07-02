@@ -36,26 +36,26 @@ echo_yellow "Configuring nut"
 # set mode to client
 sudo sed -i 's/MODE=none/MODE=netclient/' /etc/nut/nut.conf
 # apply monitoring config
-sudo echo "RUN_AS_USER nut" >> /etc/nut/upsmon.conf
-sudo echo "MONITOR $NUT_UPS_NAME@$NUT_UPS_SERVER_IP 1 $NUT_UPS_SLAVE_USER $NUT_UPS_SLAVE_PASSWORD slave" >> /etc/nut/upsmon.conf
-sudo echo "NOTIFYCMD /usr/sbin/upssched" >> /etc/nut/upsmon.conf
-sudo echo "NOTIFYFLAG ONLINE SYSLOG+WALL+EXEC" >> /etc/nut/upsmon.conf
-sudo echo "NOTIFYFLAG ONBATT SYSLOG+WALL+EXEC" >> /etc/nut/upsmon.conf
-sudo echo "NOTIFYFLAG LOWBATT SYSLOG+WALL+EXEC" >> /etc/nut/upsmon.conf
+echo "RUN_AS_USER nut" | sudo tee -a /etc/nut/upsmon.conf
+echo "MONITOR $NUT_UPS_NAME@$NUT_UPS_SERVER_IP 1 $NUT_UPS_SLAVE_USER $NUT_UPS_SLAVE_PASSWORD slave" | sudo tee -a /etc/nut/upsmon.conf
+echo "NOTIFYCMD /usr/sbin/upssched" | sudo tee -a /etc/nut/upsmon.conf
+echo "NOTIFYFLAG ONLINE SYSLOG+WALL+EXEC" | sudo tee -a /etc/nut/upsmon.conf
+echo "NOTIFYFLAG ONBATT SYSLOG+WALL+EXEC" | sudo tee -a /etc/nut/upsmon.conf
+echo "NOTIFYFLAG LOWBATT SYSLOG+WALL+EXEC" | sudo tee -a /etc/nut/upsmon.conf
 # reduce poll to 3 seconds (i.e. increase frequency)
-sudo sed -i 's/POLLFREQALERT 5/POLLFREQALERT 3/' /etc/nut/nut.conf
+sudo sed -i 's/POLLFREQALERT 5/POLLFREQALERT 3/' /etc/nut/upsmon.conf
 # replace default control script
 sudo sed -i 's_CMDSCRIPT /bin/upssched-cmd_#CMDSCRIPT /bin/upssched-cmd_' /etc/nut/upssched.conf
-sudo echo "CMDSCRIPT /opt/nut/upssched/control_script.sh" >> /etc/nut/upssched.conf
+echo "CMDSCRIPT /opt/nut/upssched/control_script.sh" | sudo tee -a /etc/nut/upssched.conf
 # add pipes
-sudo echo "PIPEFN /opt/nut/upssched/upssched.pipe" >> /etc/nut/upssched.conf
-sudo echo "LOCKFN /opt/nut/upssched/upssched.lock" >> /etc/nut/upssched.conf
+echo "PIPEFN /opt/nut/upssched/upssched.pipe" | sudo tee -a /etc/nut/upssched.conf
+echo "LOCKFN /opt/nut/upssched/upssched.lock" | sudo tee -a /etc/nut/upssched.conf
 # add shutdown timer
-sudo echo "# shutdown after $NUT_UPS_SHUTDOWN_SECONDS sec. on battery" >> /etc/nut/upssched.conf
-sudo echo "AT ONBATT * START-TIMER onbattshutdown $NUT_UPS_SHUTDOWN_SECONDS" >> /etc/nut/upssched.conf
-sudo echo "AT ONLINE * CANCEL-TIMER onbattshutdown" >> /etc/nut/upssched.conf
-sudo echo "AT ONBATT * EXECUTE onbattwarn" >> /etc/nut/upssched.conf
-sudo echo "AT LOWBATT * EXECUTE onbattshutdownnow" >> /etc/nut/upssched.conf
+echo "# shutdown after $NUT_UPS_SHUTDOWN_SECONDS sec. on battery" | sudo tee -a /etc/nut/upssched.conf
+echo "AT ONBATT * START-TIMER onbattshutdown $NUT_UPS_SHUTDOWN_SECONDS" | sudo tee -a /etc/nut/upssched.conf
+echo "AT ONLINE * CANCEL-TIMER onbattshutdown" | sudo tee -a /etc/nut/upssched.conf
+echo "AT ONBATT * EXECUTE onbattwarn" | sudo tee -a /etc/nut/upssched.conf
+echo "AT LOWBATT * EXECUTE onbattshutdownnow" | sudo tee -a /etc/nut/upssched.conf
 echo_yellow "Copying control script"
 sudo mkdir -p /opt/nut/upssched
 sudo cp $SOURCE_CONFIG_FOLDER/nut/control_script.sh /opt/nut/upssched/

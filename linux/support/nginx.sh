@@ -27,3 +27,22 @@ nginx_copy_certs() {
         sudo chmod 0600 $m_dest_dir/$m_local_cert/*.key
     done
 }
+
+generate_self_signed_certs () {
+    # call enable_run_as_root if your out path can be written to only by root 
+    local m_domain=$1
+    local m_out_path=$2 # should end with /
+    local m_ip=$3 # optional
+    missing_domain () {
+        echo_red "Missing domain"
+        return
+    }
+    do_variable_non_empty m_domain do_nothing_function missing_domain
+    set_ip () {
+        m_ip=,IP:$m_ip
+    }
+    do_variable_non_empty m_ip set_ip do_nothing_function
+    maybe_run_as_root openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 \
+        -nodes -keyout $m_out_path$m_domain.key -out $m_out_path$m_domain.crt -subj "/CN=$m_domain" \
+        -addext "subjectAltName=DNS:$m_domain,DNS:*.$m_domain$m_ip"
+}

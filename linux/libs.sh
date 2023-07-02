@@ -56,21 +56,21 @@ do_variable_exist () {
   # call with var_to_check not set to the value, but to the name
   # (e.g. if you want to check variable $SOMETHING, call it as `do_variable_exist SOMETHING func1 func2` without the $)
   local var_to_check=$1
-  local yes_func=$2
+  local yes_func=$2 # executed if exists
   local no_func=$3
   shift 3 # shift arguments
   local args="$@"
-  if [ -z "${!var_to_check+x}" ]; then
-    $no_func $args
-  else
+  if [ ! -z "${!var_to_check+x}" ]; then
     $yes_func $args
+  else
+    $no_func $args
   fi
 }
 
 do_variable_non_empty () {
   # call with var_to_check not set to the value, but to the name, note that this works only if the variable is set
   local var_to_check=$1
-  local yes_func=$2
+  local yes_func=$2 # executed if not empty
   local no_func=$3
   shift 3 # shift arguments
   local args="$@"
@@ -84,7 +84,7 @@ do_variable_non_empty () {
 do_variable_exist_non_empty () {
   # call with var_to_check not set to the value, but to the name
   local var_to_check=$1
-  local yes_func=$2
+  local yes_func=$2 # executed if exists not empty
   local no_func=$3
   shift 3 # shift arguments
   local args="$@"

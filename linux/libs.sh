@@ -337,6 +337,7 @@ add_vlan_interface() {
   # add a config file in /etc/network/interfaces.d/ called vlans
   # that adds the provided vlan interface to the main interface of the system
   # with dhcp address
+  # NOTE: REQUIRES net-tools PACKAGE
   local m_main_if=$(get_main_interface)
   local m_vlan=$1 # number of the vlan subnet
   if [ -z "${m_vlan}" ]; then
@@ -350,6 +351,13 @@ add_vlan_interface() {
   echo "  vlan-raw-device ${m_main_if}" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
   echo "" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
   sudo systemctl restart networking
+}
+
+add_vlan_interface_network_manager() {
+  local m_main_if=$(get_main_interface)
+  local m_vlan=$1 # number of the vlan subnet
+  sudo nmcli con add type vlan con-name VLAN$m_vlan dev $m_main_if id $m_vlan
+  sudo nmcli connection up VLAN$m_vlan
 }
 
 

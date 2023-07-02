@@ -23,10 +23,10 @@ echo
 echo_yellow "Press ENTER to continue"
 read -p "" VAR
 
-local m_nut_control_script=$SOURCE_CONFIG_FOLDER/nut/control_script.sh
-local m_nut_usb_conf=$SOURCE_CONFIG_FOLDER/nut/usb.conf
-local m_nut_users_conf=$SOURCE_CONFIG_FOLDER/nut/users.conf
-local m_nut_email_config=$SOURCE_CONFIG_FOLDER/nut/msmtprc
+m_nut_control_script=$SOURCE_CONFIG_FOLDER/nut/control_script.sh
+m_nut_usb_conf=$SOURCE_CONFIG_FOLDER/nut/usb.conf
+m_nut_users_conf=$SOURCE_CONFIG_FOLDER/nut/users.conf
+m_nut_email_config=$SOURCE_CONFIG_FOLDER/nut/msmtprc
 
 # check if control script exist
 nut_file_not_exist() {

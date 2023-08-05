@@ -31,7 +31,7 @@ nut_control_not_exist() {
 do_file_exist $SOURCE_CONFIG_FOLDER/nut/control_script.sh do_nothing_function nut_control_not_exist
 
 echo_yellow "Installing package"
-sudo apt-get -y -q install nut-client
+install_missing_packages nut-client
 echo_yellow "Configuring nut"
 # set mode to client
 sudo sed -i 's/MODE=none/MODE=netclient/' /etc/nut/nut.conf

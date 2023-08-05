@@ -236,7 +236,7 @@ incremental_backup_if_folder_exists () {
   }
 
   local m_target_name=$(_get_post_backup_name $m_folder_to_check $m_count)
-  do_folder_exist $m_target_name incremental_backup_if_file_exists rename_from_source $m_folder_to_check $((m_count+1))
+  do_folder_exist $m_target_name incremental_backup_if_folder_exists rename_from_source $m_folder_to_check $((m_count+1))
 }
 
 incremental_backup_if_file_exists () {
@@ -339,7 +339,7 @@ add_vlan_interface() {
   # with dhcp address
   # NOTE: REQUIRES net-tools PACKAGE
   local m_main_if=$(get_main_interface)
-  local m_vlan=$1 # number of the vlan subnet
+  local m_vlan=$1 # number of the vlan subnet, e.g. 1, 2, 3, 120
   if [ -z "${m_vlan}" ]; then
     echo_red "Missing vlan number. Aborting."
     return

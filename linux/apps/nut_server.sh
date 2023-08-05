@@ -40,14 +40,14 @@ do_file_exist $m_nut_users_conf do_nothing_function nut_file_not_exist "users.co
 do_file_exist $m_nut_email_config do_nothing_function nut_file_not_exist "msmtprc"
 
 echo_yellow "Installing package"
-sudo apt-get -y -q install nut
+install_missing_packages install nut
 
 echo_yellow "Configuring nut"
 sudo chown nut /etc/nut/*
 sudo /etc/init.d/nut-server restart
 echo
+# disabled, maybe it's not needed, and broken
 #echo_purple "Disabling auto-shutdown"
-# TODO UPDATE TO CURRENT VERSION
 #sudo sed -i 's=/sbin/upsmon -K >/dev/null 2>&1 && /sbin/upsdrvctl shutdown=#/sbin/upsmon -K >/dev/null 2>&1 && /sbin/upsdrvctl shutdown=' /lib/systemd/system-shutdown/nutshutdown
 
 echo_purple "Adding usb config"
@@ -106,10 +106,10 @@ sudo chown -R root:nut /opt/nut/upssched
 echo_purple "Fixing up boot service"
 sudo sed -i -E "s/(After=.*)/\1 network-online.target/" /lib/systemd/system/nut-server.service
 sudo sed -i -E "s/(Wants=.*)/\1 network-online.target/" /lib/systemd/system/nut-server.service
-sudo sed -i "s-[Service]-[Service]\nExecStartPre=/bin/sleep 15-" /lib/systemd/system/nut-server.service
+sudo sed -i 's_\[Service\]_\[Service\]\nExecStartPre=/bin/sleep 15_' /lib/systemd/system/nut-server.service
 sudo sed -i -E "s/(After=.*)/\1 network-online.target/" /lib/systemd/system/nut-client.service
 sudo sed -i -E "s/(Wants=.*)/\1 network-online.target/" /lib/systemd/system/nut-client.service
-sudo sed -i "s_[Service]_[Service]\nExecStartPre=/bin/sleep 15_" /lib/systemd/system/nut-client.service
+sudo sed -i 's_\[Service\]_\[Service\]\nExecStartPre=/bin/sleep 25_' /lib/systemd/system/nut-client.service
 
 echo_purple "Add crontab job to restart driver every day"
 (sudo crontab -l ; echo "0 2 * * * systemctl restart nut-driver") | sudo crontab -
@@ -117,6 +117,12 @@ echo_purple "Add crontab job to restart driver every day"
 echo_yellow "Setting permissions"
 # remove requirement for password for nut user for shutdown command
 echo 'nut ALL=NOPASSWD:/usr/sbin/shutdown' | sudo EDITOR='tee -a' visudo
+
+echo_purple "Enabling system service"
+sudo systemctl enable nut-server
+sudo systemctl start nut-server
+sudo systemctl enable nut-client
+sudo systemctl start nut-client
 
 echo_yellow "Configuring email service"
 sudo apt-get -y -q install msmtp msmtp-mta

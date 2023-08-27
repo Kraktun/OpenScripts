@@ -20,4 +20,4 @@ def execute_command(command_with_args, silent=False, return_output=False, shell=
         raise subprocess.CalledProcessError(proc.returncode, proc.args)
     
     if return_output:
-        return output_lines
+        return "".join(output_lines)

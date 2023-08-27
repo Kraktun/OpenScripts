@@ -1,17 +1,12 @@
 import yaml
 import os
-import sys
 import argparse
 import re
 import datetime 
 
-# add path to local libs
-abspath = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir, os.pardir))
-dir_path = os.path.dirname(abspath)
-sys.path.insert(0, dir_path)
 # load local libs
-from common.io import drive_utils
-from common.io import process_utils
+from openscripts.io import drive_utils
+from openscripts.io import process_utils
 from DriveObject import DriveObject
 
 DATE_TIME_REGEX = "\$datetime{(.*?)}"
@@ -166,7 +161,7 @@ def _process_available_drives(available_drives, rclone_exe, rclone_current_mode,
             path_b = dr.path
             print_and_log(f"Syncing drives: {available_drives[0].drive_name} -> {dr.drive_name}")
             output_print = process_utils.execute_command([rclone_exe, rclone_current_mode, path_a, path_b, *rclone_final_args], return_output=True)
-            print_and_log("".join(output_print), skip_stdout=True)
+            print_and_log(output_print, skip_stdout=True)
     else:
         print_and_log(f"Less than two drives available, skipping.")
 

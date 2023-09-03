@@ -4,7 +4,7 @@ import subprocess
 def execute_command(command_with_args, silent=False, return_output=False, shell=True):
     output_lines = []
     with subprocess.Popen(command_with_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-            universal_newlines=True, shell=shell, bufsize=1) as proc:
+            universal_newlines=True, shell=shell, bufsize=1, encoding="utf-8") as proc:
         (out, err) = proc.communicate() # use communicate or we may get a deadlock
         if out is not None:
             for line in out:

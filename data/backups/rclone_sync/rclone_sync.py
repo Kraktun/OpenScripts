@@ -77,11 +77,10 @@ def main():
     # get output_file
     OUTPUT_FILE = load_key_or_default(config_dic['config'], 'output_file', default=None, ignore_empty=True)
     # check if placeholders are used for date and time
-    if OUTPUT_FILE is not None:
-        def replace_regex_with_format(match_obj):
-            datetime_format = match_obj.group(1)
-            return current_datetime.strftime(datetime_format)
-        
+    def replace_regex_with_format(match_obj):
+        datetime_format = match_obj.group(1)
+        return current_datetime.strftime(datetime_format)
+    if OUTPUT_FILE is not None:       
         OUTPUT_FILE = re.sub(DATE_TIME_REGEX, replace_regex_with_format, OUTPUT_FILE)
 
     print_and_log(f"Starting rclone sync @ {current_datetime.strftime('%Y/%m/%d %H:%M:%S')}")
@@ -118,6 +117,7 @@ def main():
             rclone_args = empty_list_on_empty_string(rclone_args, split_on=" ")
             rclone_final_args = rclone_global_args[:] # slice to make a copy
             rclone_final_args.extend(rclone_args)
+            rclone_final_args = [re.sub(DATE_TIME_REGEX, replace_regex_with_format, arr) for arr in rclone_final_args]
             # get optional overwrite mode
             rclone_current_mode = load_key_or_default(fold, 'overwrite_mode', sync_mode, ignore_empty=True)
 
@@ -146,6 +146,7 @@ def main():
                 rclone_drive_args = empty_list_on_empty_string(rclone_drive_args, split_on=" ")
                 rclone_final_args = rclone_path_args[:]
                 rclone_final_args.extend(rclone_drive_args)
+                rclone_final_args = [re.sub(DATE_TIME_REGEX, replace_regex_with_format, arr) for arr in rclone_final_args]
 
                 if drive_name in curr_names:
                     available_drives.append(DriveObject(drive_name, curr_drives, path=drive_path))

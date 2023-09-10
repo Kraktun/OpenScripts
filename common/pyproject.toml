@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openscripts"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Kraktun"]
 readme = "README.md"
@@ -13,6 +13,7 @@ click = "^8.1.7"
 emoji = "^2.8.0"
 pyyaml = "^6.0.1"
 pillow = "^10.0.0"
+pypiwin32 = "^223"
 
 
 [build-system]

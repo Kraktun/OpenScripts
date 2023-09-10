@@ -1,4 +1,4 @@
-from common.global_utils import is_linux, is_windows
+from openscripts.global_utils import is_linux, is_windows
 from .process_utils import execute_command
 import psutil
 

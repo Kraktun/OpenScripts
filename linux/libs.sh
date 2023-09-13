@@ -1,11 +1,18 @@
 #!/bin/bash
 
-# beware: currently I'm reusing variables in recursive calls, so if you run functions with as arguments
+# Beware: currently I'm reusing variables in recursive calls, so if you run functions with as arguments
 # other functions of this script you may get weird/wrong results.
+# Also, don't expect for things to work deterministically. Sometimes I don't know what I'm doing.
+
+# Note: for the functions you pass as arguments, if you want to exit the script, use `exit`, not `return` or it just returns from the function.
 
 
-# check if any folder passed as parameter exists
 check_folder_exist () {
+  # check if any folder passed as parameter exists.
+  # Return 0 if it doesn't, 1 otherwise
+
+  # example usage
+  #   check_folder_exist /path/to/my/folder
   local folder_to_check=$1
   if [ ! -d "$folder_to_check" ]; then
     echo "0" # does not exist
@@ -15,7 +22,16 @@ check_folder_exist () {
 }
 
 do_folder_exist () {
-  # call with `do_folder_exist folder_to_check function_folder_exist function_folder_not_exist`
+  # execute a command or function if the provided folder exists
+  
+  # example usage
+  #   echo_exists(){
+  #     echo "Folder exists. Passed arg is $1"    
+  #   }
+  #   echo_doesnt_exist(){
+  #     echo "Folder doesn't exist. Passed arg is $1"    
+  #   }
+  #   do_folder_exist /path/to/my/folder echo_exists echo_doesnt_exist "optional_argument"
   local folder_to_check=$1
   local yes_func=$2
   local no_func=$3
@@ -28,8 +44,12 @@ do_folder_exist () {
   fi
 }
 
-# check if any file passed as parameter exists
 check_file_exist () {
+  # check if any folder passed as parameter exists.
+  # Return 0 if it doesn't, 1 otherwise
+
+  # example usage
+  #   check_file_exist /path/to/my/file.txt
   local file_to_check=$1
   if [ ! -e "$file_to_check" ]; then
     echo "0" # does not exist
@@ -39,7 +59,9 @@ check_file_exist () {
 }
 
 do_file_exist () {
-  # call with `do_file_exist file_to_check function_file_exist function_file_not_exist`
+  # execute a command or function if the provided file exists
+
+  # example usage: see do_folder_exist
   local file_to_check=$1
   local yes_func=$2
   local no_func=$3
@@ -53,8 +75,17 @@ do_file_exist () {
 }
 
 do_variable_exist () {
-  # call with var_to_check not set to the value, but to the name
-  # (e.g. if you want to check variable $SOMETHING, call it as `do_variable_exist SOMETHING func1 func2` without the $)
+  # Execute a function if a variable exists
+
+  # example usage
+  #   echo_exists(){
+  #     echo "Variable exists. Passed arg is $1"    
+  #   }
+  #   echo_doesnt_exist(){
+  #     echo "Variable doesn't exist. Passed arg is $1"    
+  #   }
+  #   MY_SUPER_VAR=ciao
+  #   do_variable_exist MY_SUPER_VAR echo_exists echo_doesnt_exist "optional_argument"
   local var_to_check=$1
   local yes_func=$2 # executed if exists
   local no_func=$3
@@ -68,7 +99,8 @@ do_variable_exist () {
 }
 
 do_variable_non_empty () {
-  # call with var_to_check not set to the value, but to the name, note that this works only if the variable is set
+  # Similar to do_variable_exist, but here we check that the variable is non empty. Note that this works only if the variable is set.
+  # Use do_variable_exist_non_empty if you are not sure if the variable exists.
   local var_to_check=$1
   local yes_func=$2 # executed if not empty
   local no_func=$3
@@ -82,7 +114,7 @@ do_variable_non_empty () {
 }
 
 do_variable_exist_non_empty () {
-  # call with var_to_check not set to the value, but to the name
+  # Similar to do_variable_exist but also checks that the variable is not empty.
   local var_to_check=$1
   local yes_func=$2 # executed if exists not empty
   local no_func=$3
@@ -96,12 +128,14 @@ do_variable_exist_non_empty () {
 }
 
 do_sourced_file() {
-  # execute functions if current script has been sourced or not
-  # You need to specify the source level, i.e. which is the script you want to know if it was sourced
-  # If for instance you want to know if the script that sourced this lib was itself sourced, you need to use level 1
-  # If you copied the func to your source script, then use level 0
-  # Note: if you want to exit in both cases, you should use `exit` for both func
-  # otherwise with return it will just return the current function and not the code that called it
+  # Execute functions if the current script has been sourced or not.
+  # You need to specify the source level, i.e. which is the script you want to know if it was sourced.
+  # Levels start from 0.
+  # If for instance you have a script that calls `source libs.sh` and want to know if that script was itself sourced, you need to use level 1.
+  # If you copy this function to your own script and want to know if your script is being sourced, then use level 0.
+
+  # example usage
+  #   do_sourced_file 1 script_was_sourced_func script_was_not_sourced_func optional args
   local source_level=$1
   local yes_func=$2
   local no_func=$3
@@ -114,16 +148,21 @@ do_sourced_file() {
   fi
 }
 
-# get id of a group
 get_group_id () {
-  # call as my_var=`get_group_id my_group_name`
+  # Return the id of a group
+
+  # example usage
+  #   my_var=`get_group_id my_group_name`
   local group_name=$1
   local gr_id=`getent group $group_name | cut -d: -f3`
   echo $gr_id
 }
 
 ask_yes_no_function () {
-  # call with `ask_yes_no_function "my message" function_1 function_2`
+  # Print a message asking y/n and execute functions depending on the answer.
+
+  # example usage
+  #   ask_yes_no_function "Do you want to proceed?" yes_function no_function optional args
   local message=$1
   local yes_func=$2
   local no_func=$3
@@ -142,23 +181,36 @@ ask_yes_no_function () {
 }
 
 do_nothing_function () {
+  # This function just waits a bit. Can't be 0 or it is skipped all together.
   sleep 0.01
 }
 
 enable_color_prompt () {
-  local user=$1
-  maybe_run_as_root sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' /home/$user/.bashrc
+  # Enable the color prompt in most debian based systems.
+  # If you want to enable it for a different user from the one that is calling the function, you need to call `enable_run_as_root`` first.
+
+  # example usage
+  #   enable_color_prompt $USER
+  local m_user=$1
+  maybe_run_as_root sed -i 's/#force_color_prompt=yes/force_color_prompt=yes/' /home/$m_user/.bashrc
 }
 
 disable_home_share () {
+  # Sets the permission for the new users folders in /home/*.
+  # Also set the same permission to the ones already present.
+  # The permission disables rx access to 'other'.
+
   enable_run_as_root
   incremental_backup_if_file_exists /etc/adduser.conf
   disable_run_as_root
-  maybe_run_as_root sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
+  sudo sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
+  sudo find /home -maxdepth 1 -mindepth 1 -type d -exec chmod 750 {} \;
 }
 
 _run_as_root () {
-  # Note: works only with functions that do not execute other functions
+  # Run the passed function as root. The passed argument must be either a command or a top level function.
+  # Top level function = a function that does not execute other functions, but only commands.
+  
   local m_func_name=$1
   shift
   local m_args=$*
@@ -173,30 +225,46 @@ _run_as_root () {
 }
 
 enable_run_as_root () {
-  M_RUN_AS_ROOT=1
+  # Execute the following functions that may require root as root.
+  M_RUN_AS_ROOT_K=1
 }
 
 disable_run_as_root () {
-  unset M_RUN_AS_ROOT
+  # Disable root for the following functions.
+  unset M_RUN_AS_ROOT_K
 }
 
 maybe_run_as_root () {
-  # prepend to any command (not function) you may need to run as root
-  # to actually run it as root you need to call `enable_run_as_root` right before it
+  # Execute the passed top level function or command as root only if enable_run_as_root was called.
+  # Execute as your user if enable_run_as_root was not called or disable_run_as_root was called after it.
+
+  # example usage
+  #   maybe_run_as_root my_top_level_function optional arguments
+  # or
+  #   enable_run_as_root
+  #   maybe_run_as_root systemctl enable nginx
+  #   disable_run_as_root
   local m_func_name=$1
   shift
   m_run_as_root_explicit_func () {
     _run_as_root $m_func_name $@
   }
-  do_variable_exist_non_empty M_RUN_AS_ROOT m_run_as_root_explicit_func $m_func_name $@
+  do_variable_exist_non_empty M_RUN_AS_ROOT_K m_run_as_root_explicit_func $m_func_name $@
 }
 
 _get_pre_backup_name () {
+  # Return the original name of the file we want to backup, i.e. the file without the suffix .bakN (with N any number, also no number)
+  # For reference
+  # https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html#Shell-Parameter-Expansion
+  # https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
+
   local m_file=$1
-  echo "${m_file%.bak*[0-9]}"
+  echo "${m_file%.bak*([0-9])}"
 }
 
 _get_post_backup_name () {
+  # Return the backup name with the provided counter as $original_filename.bak$counter
+
   local m_file=$1
   local m_counter=$2
   if [[ ( -z "$m_counter" ) || ( "$m_counter" == 0 ) ]] ; then
@@ -205,24 +273,20 @@ _get_post_backup_name () {
   echo "${m_file}.bak${m_counter}"
 }
  
-rename_bak_file () {
+_rename_bak_file () {
+  # Make a backup copy of the provided file with the specified backup counter.
+  # _rename_bak_file /path/to/file/to/rename.txt 2
   local m_out_name=$(_get_post_backup_name $1 $2)
   maybe_run_as_root cp -r "$1" "$m_out_name"
 }
 
-backup_if_folder_exists () {
-  local folder_to_check=$1
-  local m_counter=$2
-  do_folder_exist $folder_to_check rename_bak_file do_nothing_function $folder_to_check $m_counter
-}
-
-backup_if_file_exists () {
-  local file_to_check=$1
-  local m_counter=$2
-  do_file_exist $file_to_check rename_bak_file do_nothing_function $file_to_check $m_counter
-}
-
 incremental_backup_if_folder_exists () {
+  # Create a copy of the provided folder by appending .bakN with N an increasing number starting from 0.
+  # If a folder with suffix .bakN is already present, the latest digit (N) will be recursively incremented.
+  # The initial number can be omitted.
+
+  # example usage
+  #   incremental_backup_if_folder_exists /path/to/folder
   local m_folder_to_check=$1
   local m_count=$2
   if [[ ( -z "$m_count" ) || ( "$m_count" == 0 ) ]] ; then
@@ -232,14 +296,30 @@ incremental_backup_if_folder_exists () {
   rename_from_source () {
     local m_source_name=$(_get_pre_backup_name $1)
     local m_m_count=$2
-    rename_bak_file $m_source_name $((m_m_count-1))
+    _rename_bak_file $m_source_name $((m_m_count-1))
   }
 
   local m_target_name=$(_get_post_backup_name $m_folder_to_check $m_count)
   do_folder_exist $m_target_name incremental_backup_if_folder_exists rename_from_source $m_folder_to_check $((m_count+1))
 }
 
+date_backup_if_exists () {
+  # Create a copy of the provided folder\file by appending .bak_$date where date has format %Y%m%d_%H%M%S
+
+  # example usage
+  #   date_backup_if_exists /path/to/folder
+  local m_source_name=$1
+  local m_date=_$(get_date_string)
+  _rename_bak_file $m_source_name $m_date
+}
+
 incremental_backup_if_file_exists () {
+  # Create a copy of the provided file by appending .bakN with N an increasing number starting from 0.
+  # If a file with suffix .bakN is already present, the latest digit (N) will be recursively incremented.
+  # The initial number can be omitted.
+
+  # example usage
+  #   incremental_backup_if_file_exists /path/to/file.txt
   local m_file_to_check=$1
   local m_count=$2
   if [[ ( -z "$m_count" ) || ( "$m_count" == 0 ) ]] ; then
@@ -249,7 +329,7 @@ incremental_backup_if_file_exists () {
   rename_from_source () {
     local m_source_name=$(_get_pre_backup_name $1)
     local m_m_count=$2
-    rename_bak_file $m_source_name $((m_m_count-1))
+    _rename_bak_file $m_source_name $((m_m_count-1))
   }
 
   local m_target_name=$(_get_post_backup_name $m_file_to_check $m_count)
@@ -257,9 +337,12 @@ incremental_backup_if_file_exists () {
 }
 
 git_clone_folder () {
-  # Clone only a subfolder of a git repository
+  # Clone only a subfolder of a git repository in this folder. Note that the structure of the repo is preserved (i.e. it will always create a folder with the name of the repo)
   # Git url can be either https://github.com/USERNAME/REPOSITORY or https://github.com/USERNAME/REPOSITORY.git
   # The function can not process other formats (e.g. /tree/BRANCH_NAME)
+
+  # example usage
+  #   git_clone_folder https://github.com/Kraktun/OpenScripts linux
   local git_url=$1
   local folder_to_download=$2
   local target_branch=$3
@@ -289,12 +372,19 @@ git_clone_folder () {
 }
 
 get_date_string () {
+  # Get current date in the format %Y%m%d_%H%M%S
+
+  # example usage
+  #   my_var=$(get_date_string)
   local curr_date=`date +"%Y%m%d_%H%M%S"`
   echo $curr_date
 }
 
 create_new_user () {
-  # create new user with pww and generate ssh key
+  # create a new user with the provided (hashed) password and generate ssh key
+
+  # example usage
+  #   create_new_user pippo '$1$ks/H3N$dsnh3nGeKwm9B/'
   local m_new_user=$1
   local m_new_password=$2
   echo "Creating $m_new_user user"
@@ -305,14 +395,22 @@ create_new_user () {
 }
 
 get_missing_packages() {
-  # mainly from https://stackoverflow.com/a/48615797
-  # check if a list of packages is installed or not, return those that are not installed in a single string separated by a whitespace
-  # simply run as `get_missing_packages nano git curl`
+  # Mainly from https://stackoverflow.com/a/48615797
+  # check if a list of packages is installed or not, return those that are not installed in a single string separated by a whitespace.
+  # For debian based distros.
+
+  # example usage
+  #   my_missing_packages=$(get_missing_packages nano git curl)
   local m_packages=$*
   echo $(dpkg --get-selections $m_packages 2>&1 | grep -v ' install$' | awk '{ print $6 }'  | tr '\n' ' '  | xargs)
 }
 
 install_missing_packages() {
+  # Install only the missing packages from a list of provided packages.
+  # For debian based distros.
+
+  # example usage
+  #   install_missing_packages git curl nginx
   local m_packages=$*
   m_packages=`get_missing_packages $m_packages`
   if [ ! -z "$m_packages" ]; then
@@ -322,38 +420,55 @@ install_missing_packages() {
 }
 
 get_local_ip() {
-  # from https://stackoverflow.com/a/25851186
-  # get local ip of the main interface
+  # From https://stackoverflow.com/a/25851186
+  # get the local ip of the main interface
+
+  # example usage
+  #   my_ip=`get_local_ip`
   echo $(ip route get 1 | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
 }
 
 get_main_interface() {
-  # get main interface name
+  # Get main interface name
+
+  # example usage
+  #   my_if=`get_main_interface`
   local m_my_ip=$(get_local_ip)
   echo $(ifconfig | grep -B1 $m_my_ip | grep -o "^\w*")
 }
 
 add_vlan_interface() {
-  # add a config file in /etc/network/interfaces.d/ called vlans
+  # Add a config file in /etc/network/interfaces.d/ called vlans
   # that adds the provided vlan interface to the main interface of the system
   # with dhcp address
   # NOTE: REQUIRES net-tools PACKAGE
+
+  # example usage
+  #   add_vlan_interface 5
   local m_main_if=$(get_main_interface)
   local m_vlan=$1 # number of the vlan subnet, e.g. 1, 2, 3, 120
   if [ -z "${m_vlan}" ]; then
     echo_red "Missing vlan number. Aborting."
     return
   fi
+  local m_target_file="/etc/network/interfaces.d/vlan${m_vlan}.conf"
+  enable_run_as_root
+  incremental_backup_if_file_exists $m_target_file
+  disable_run_as_root
   sudo mkdir -p /etc/network/interfaces.d
-  echo "" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
-  echo "auto ${m_main_if}.${m_vlan}" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
-  echo "  iface ${m_main_if}.${m_vlan} inet dhcp" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
-  echo "  vlan-raw-device ${m_main_if}" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
-  echo "" | sudo tee -a /etc/network/interfaces.d/vlan${m_vlan}.conf > /dev/null
+  echo """
+auto ${m_main_if}.${m_vlan}
+  iface ${m_main_if}.${m_vlan} inet dhcp
+  vlan-raw-device ${m_main_if}
+  """ | sudo tee -a $m_target_file > /dev/null
   sudo systemctl restart networking
 }
 
 add_vlan_interface_network_manager() {
+  # Add a vlan interface to armbian (maybe other debian distros)
+
+  # example usage
+  #   add_vlan_interface 5
   local m_main_if=$(get_main_interface)
   local m_vlan=$1 # number of the vlan subnet
   sudo nmcli con add type vlan con-name VLAN$m_vlan dev $m_main_if id $m_vlan
@@ -362,8 +477,11 @@ add_vlan_interface_network_manager() {
 
 
 add_vlan_interface_netplan() {
-  # for ubuntu > 18.04
   # add vlan to config file in /etc/netplan/10-vlan-config.yaml
+  # For ubuntu > 18.04
+
+  # example usage
+  #   add_vlan_interface 5 '192.168.5.0/24' 192.168.5.1
   local m_main_if=$(get_main_interface)
   local m_vlan=$1 # number of the vlan subnet
   local m_subnet=$2 # subnet e.g. 192.168.1.0/24
@@ -377,7 +495,6 @@ add_vlan_interface_netplan() {
   enable_run_as_root
   incremental_backup_if_file_exists $m_target_file
   disable_run_as_root
-  sudo cp /etc/netplan/10-vlan-config.yaml /etc/netplan/10-vlan-config.yaml.bak
   if [ -z "${m_vlan}" ]; then
     echo_red "Missing vlan number. Aborting."
     return
@@ -416,7 +533,7 @@ source_support_libs() {
 }
 
 
-load_colors () {
+_load_colors () {
   NO_COLOR='\033[0m'
   COLOR_BLACK='\033[0;30m'
   COLOR_RED='\033[0;31m'
@@ -428,8 +545,8 @@ load_colors () {
   COLOR_WHITE='\033[0;37m'
 }
 
-echo_color () {
-  load_colors
+_echo_color () {
+  _load_colors
   local color=$1
   shift 1
   local s="$@"
@@ -469,26 +586,28 @@ echo_color () {
 }
 
 echo_black () {
-  echo_color "black" "$*"
+  _echo_color "black" "$*"
 }
 echo_red () {
-  echo_color "red" "$*"
+  # example usage
+  #   echo_black hello I'll be printed in red
+  _echo_color "red" "$*"
 }
 echo_green () {
-  echo_color "green" "$*"
+  _echo_color "green" "$*"
 }
 echo_yellow () {
-  echo_color "yellow" "$*"
+  _echo_color "yellow" "$*"
 }
 echo_blue () {
-  echo_color "blue" "$*"
+  _echo_color "blue" "$*"
 }
 echo_purple () {
-  echo_color "purple" "$*"
+  _echo_color "purple" "$*"
 }
 echo_cyan () {
-  echo_color "cyan" "$*"
+  _echo_color "cyan" "$*"
 }
 echo_white () {
-  echo_color "white" "$*"
+  _echo_color "white" "$*"
 }

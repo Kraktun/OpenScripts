@@ -9,7 +9,8 @@
 
 check_folder_exist () {
   # check if any folder passed as parameter exists.
-  # Return 0 if it doesn't, 1 otherwise
+  # Return 0 if it doesn't, 1 otherwise.
+  # Yes, ugly, but it's like this for compatibility with old stuff that I wrote.
 
   # example usage
   #   check_folder_exist /path/to/my/folder
@@ -200,9 +201,13 @@ disable_home_share () {
   # Also set the same permission to the ones already present.
   # The permission disables rx access to 'other'.
 
-  enable_run_as_root
-  incremental_backup_if_file_exists /etc/adduser.conf
-  disable_run_as_root
+  if [[ $(is_run_as_root) ]]; then 
+    incremental_backup_if_file_exists /etc/adduser.conf
+  else
+    enable_run_as_root
+    incremental_backup_if_file_exists /etc/adduser.conf
+    disable_run_as_root
+  fi
   sudo sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
   sudo find /home -maxdepth 1 -mindepth 1 -type d -exec chmod 750 {} \;
 }
@@ -214,6 +219,7 @@ _run_as_root () {
   local m_func_name=$1
   shift
   local m_args=$*
+  # contains the content of the function, empty if it's a command
   local m_func_cont=$(declare -f $m_func_name)
   _is_function () {
     sudo bash -c "$m_func_cont; $m_func_name $m_args"
@@ -234,6 +240,19 @@ disable_run_as_root () {
   unset M_RUN_AS_ROOT_K
 }
 
+is_run_as_root () {
+  # Check if run as root is enabled
+
+  # example usage
+  # if [[ $(is_run_as_root) ]]; then
+  #   echo "Yes"
+  # fi
+  echo_true () {
+    echo 1
+  }
+  do_variable_exist_non_empty M_RUN_AS_ROOT_K echo_true do_nothing_function
+}
+
 maybe_run_as_root () {
   # Execute the passed top level function or command as root only if enable_run_as_root was called.
   # Execute as your user if enable_run_as_root was not called or disable_run_as_root was called after it.
@@ -249,7 +268,11 @@ maybe_run_as_root () {
   m_run_as_root_explicit_func () {
     _run_as_root $m_func_name $@
   }
-  do_variable_exist_non_empty M_RUN_AS_ROOT_K m_run_as_root_explicit_func $m_func_name $@
+  if [[ $(is_run_as_root) ]]; then
+    m_run_as_root_explicit_func $@
+  else
+    $m_func_name $@
+  fi
 }
 
 _get_pre_backup_name () {
@@ -452,9 +475,13 @@ add_vlan_interface() {
     return
   fi
   local m_target_file="/etc/network/interfaces.d/vlan${m_vlan}.conf"
-  enable_run_as_root
-  incremental_backup_if_file_exists $m_target_file
-  disable_run_as_root
+  if [[ $(is_run_as_root) ]]; then
+    incremental_backup_if_file_exists $m_target_file
+  else
+    enable_run_as_root
+    incremental_backup_if_file_exists $m_target_file
+    disable_run_as_root
+  fi
   sudo mkdir -p /etc/network/interfaces.d
   echo """
 auto ${m_main_if}.${m_vlan}
@@ -492,9 +519,13 @@ add_vlan_interface_netplan() {
     m_gateway=${m_gateway::-4}1
   fi
   # Do a backup
-  enable_run_as_root
-  incremental_backup_if_file_exists $m_target_file
-  disable_run_as_root
+  if [[ $(is_run_as_root) ]]; then
+    incremental_backup_if_file_exists $m_target_file
+  else
+    enable_run_as_root
+    incremental_backup_if_file_exists $m_target_file
+    disable_run_as_root
+  fi
   if [ -z "${m_vlan}" ]; then
     echo_red "Missing vlan number. Aborting."
     return
@@ -524,6 +555,27 @@ add_vlan_interface_netplan() {
             metric: 100
   """ | sudo tee -a $m_target_file > /dev/null
   sudo netplan apply
+}
+
+wait_for_connection () {
+  # Wait for connection to be up, either a server or a generic url with user defined timeout (seconds).
+
+  # example usage
+  #   return_code=$(wait_for_connection google.com 30)
+  # or
+  #   return_code=$(wait_for_connection 192.168.0.10 30)
+  local m_url=$1
+  local m_timeout=$2
+  local m_counter=0
+  until ping -q -w 1 -c 1 $m_url > /dev/null || [[ $m_counter -ge $m_timeout ]]
+  do
+    sleep 1
+    m_counter=$((m_counter + 1))
+  done
+
+  if [[ $m_counter -ge $m_timeout ]]; then
+    return 1
+  fi
 }
 
 

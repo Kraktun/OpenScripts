@@ -46,17 +46,17 @@ sudo chmod 750 /home/$RESTIC_USER/bin/restic
 echo_yellow "Copying credentials"
 sudo mkdir -p /home/$RESTIC_USER/restic/conf
 sudo chown $RESTIC_USER:root /home/$RESTIC_USER/restic
-sudo cp $SOURCE_CONFIG_FOLDER/restic/conf/* /home/$RESTIC_USER/restic/conf/
+sudo cp -r $SOURCE_CONFIG_FOLDER/restic/conf/* /home/$RESTIC_USER/restic/conf/
 echo_yellow "Copying scripts"
 sudo mkdir -p /home/$RESTIC_USER/restic/scripts
-sudo cp $SOURCE_CONFIG_FOLDER/restic/scripts/* /home/$RESTIC_USER/restic/scripts/
+sudo cp -r $SOURCE_CONFIG_FOLDER/restic/scripts/* /home/$RESTIC_USER/restic/scripts/
 echo_yellow "Setting permissions"
 sudo chown $RESTIC_USER:$RESTIC_USER /home/$RESTIC_USER
 sudo chown root:$RESTIC_USER /home/$RESTIC_USER/bin/restic
 sudo chown -R $RESTIC_USER:root /home/$RESTIC_USER/restic/conf
 sudo chown -R $RESTIC_USER:root /home/$RESTIC_USER/restic/scripts
-sudo chmod 640 /home/$RESTIC_USER/restic/conf/*
-sudo chmod 740 /home/$RESTIC_USER/restic/scripts/*
+sudo chmod -R 640 /home/$RESTIC_USER/restic/conf/*
+sudo chmod -R 740 /home/$RESTIC_USER/restic/scripts/*
 sudo usermod -a -G $RESTIC_HDD_GROUP $RESTIC_USER
 sudo mkdir -p $RESTIC_BACKUP_DIRECTORY
 sudo chown $RESTIC_USER:$RESTIC_HDD_GROUP $RESTIC_BACKUP_DIRECTORY

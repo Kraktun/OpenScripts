@@ -5,12 +5,13 @@ set -eu
 # and libs.sh loaded
 
 # RESTIC_USER= # name of the user that will control restic
+# RESTIC_PASSWORD= #password of the user above
 # RESTIC_BACKUP_DIRECTORY= # directory that restic will have access to
 # RESTIC_HDD_GROUP= # group that owns the $RESTIC_BACKUP_DIRECTORY
 # SOURCE_CONFIG_FOLDER= # folder that contains the configuration files and scripts
 #   $SOURCE_CONFIG_FOLDER/restic/conf and $SOURCE_CONFIG_FOLDER/restic/scripts are assumed to exist and contain the aforementioned files
 
-# currently supports only raspberry os 32bit and armbian64, populate the required RESTIC_ARCH for other architectures
+# currently supports only arm32 and 64, populate the required RESTIC_ARCH for other architectures
 
 echo
 echo_purple "#######################################"
@@ -23,9 +24,9 @@ read -p "" VAR
 RESTIC_VERSION=`curl -sL https://api.github.com/repos/restic/restic/releases/latest | jq -r ".tag_name"`
 RESTIC_VERSION="${RESTIC_VERSION:1}"
 MY_ARCH=`uname -m`
-if [ "$MY_ARCH" = "aarch64" ]; then # armbian
+if [ "$MY_ARCH" = "aarch64" ]; then # arm64
   RESTIC_ARCH="arm64"
-elif [ "$MY_ARCH" = "armv7l" ]; then # raspberry 32bit
+elif [ "$MY_ARCH" = "armv7l" ]; then # arm32
   RESTIC_ARCH="arm"
 else
   echo "Unknown architecture"
@@ -38,7 +39,7 @@ echo
 echo_yellow "Press ENTER to continue"
 read -p "" VAR
 
-sudo useradd -m $RESTIC_USER
+create_new_user $RESTIC_USER $RESTIC_PASSWORD
 sudo mkdir /home/$RESTIC_USER/bin
 sudo chown $RESTIC_USER:$RESTIC_USER /home/$RESTIC_USER/bin
 sudo -H -u $RESTIC_USER bash -c "curl -L https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_${RESTIC_ARCH}.bz2 | bunzip2 > /home/$RESTIC_USER/bin/restic"

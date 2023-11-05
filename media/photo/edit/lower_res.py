@@ -151,7 +151,7 @@ def main():
         else:
             out_size = target_size
             out_append_name = f"s{target_size[0]}x{target_size[1]}"
-        out_image = s_image.resize(out_size, Image.ANTIALIAS)
+        out_image = s_image.resize(out_size, Image.LANCZOS)
         out_file = out_dir / f"{Path(fl).stem}_[{out_append_name}]{out_extension}"
         if out_extension == ".png":
             out_image.save(out_file, format="PNG", compress_level=9)

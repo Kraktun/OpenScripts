@@ -42,7 +42,7 @@ def print_and_log(my_string, skip_stdout=False):
     if not skip_stdout: 
         print(my_string)
     if OUTPUT_FILE is not None:
-        with open(OUTPUT_FILE, 'a') as of:
+        with open(OUTPUT_FILE, 'a', encoding="utf-8") as of:
                 of.write(f"\n{my_string}")
 
 def main():

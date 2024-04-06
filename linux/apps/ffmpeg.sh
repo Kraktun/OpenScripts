@@ -16,6 +16,16 @@ echo
 echo_yellow "Press ENTER to continue"
 read -p "" VAR
 
+
+TEMP_FFMPEG_DIR=/tmp/ffmpeg_tmp
+
+mkdir -p $TEMP_FFMPEG_DIR
+
+FFMPEG_CURRENT_DIR=`pwd`
+FFMPEG_CURRENT_DATE=`date +"%Y-%m-%d_%H%M"`
+
+FFMPEG_LOG_FILE=$TEMP_FFMPEG_DIR/ffmpeg_log_$FFMPEG_CURRENT_DATE.log
+
 # check target value
 
 case $FFMPEG_TARGET in
@@ -26,20 +36,12 @@ case $FFMPEG_TARGET in
 	return 1 ;;
 esac
 
-
-local TEMP_FFMPEG_DIR=/tmp/ffmpeg_tmp
-
-local FFMPEG_CURRENT_DIR=`pwd`
-local FFMPEG_CURRENT_DATE=`date +"%Y-%m-%d_%H%M"`
-
-local FFMPEG_LOG_FILE=$TEMP_FFMPEG_DIR/ffmpeg_log_$FFMPEG_CURRENT_DATE.log
-
 # install required dependencies
 sudo apt-get update >> /dev/null
 if [ "$FFMPEG_TARGET" = "raspi" ]; then
-	sudo apt-get install -y -q build-essential git autoconf automake cmake libtool >> /dev/null
+	sudo apt-get install -y build-essential git autoconf automake cmake libtool >> /dev/null
 elif [ "$FFMPEG_TARGET" = "x64" ]; then
-	sudo apt-get install -y -q build-essential git autoconf automake cmake libtool libass-dev libfreetype6-dev libgnutls28-dev libmp3lame-dev libsdl2-dev \
+	sudo apt-get install -y build-essential git autoconf automake cmake libtool libass-dev libfreetype6-dev libgnutls28-dev libmp3lame-dev libsdl2-dev \
 		libva-dev libvdpau-dev  libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev meson ninja-build pkg-config texinfo wget yasm zlib1g-dev libunistring-dev >> /dev/null
 fi
 

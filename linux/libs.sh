@@ -554,6 +554,7 @@ add_vlan_interface_netplan() {
             via: ${m_gateway}
             metric: 100
   """ | sudo tee -a $m_target_file > /dev/null
+  sudo chmod 640 $m_target_file
   sudo netplan apply
 }
 

@@ -24,7 +24,7 @@ echo_yellow "Press ENTER to continue"
 read -p "" VAR
 
 m_nut_control_script=$SOURCE_CONFIG_FOLDER/nut/control_script.sh
-m_nut_usb_conf=$SOURCE_CONFIG_FOLDER/nut/usb.conf
+m_nut_ups_conf=$SOURCE_CONFIG_FOLDER/nut/ups.conf
 m_nut_users_conf=$SOURCE_CONFIG_FOLDER/nut/users.conf
 m_nut_email_config=$SOURCE_CONFIG_FOLDER/nut/msmtprc
 
@@ -35,7 +35,7 @@ nut_file_not_exist() {
     exit 1
 }
 do_file_exist $m_nut_control_script do_nothing_function nut_file_not_exist "control_script"
-do_file_exist $m_nut_usb_conf do_nothing_function nut_file_not_exist "usb.conf"
+do_file_exist $m_nut_ups_conf do_nothing_function nut_file_not_exist "ups.conf"
 do_file_exist $m_nut_users_conf do_nothing_function nut_file_not_exist "users.conf"
 do_file_exist $m_nut_email_config do_nothing_function nut_file_not_exist "msmtprc"
 
@@ -46,12 +46,9 @@ echo_yellow "Configuring nut"
 sudo chown nut /etc/nut/*
 sudo /etc/init.d/nut-server restart
 echo
-# disabled, maybe it's not needed, and broken
-#echo_purple "Disabling auto-shutdown"
-#sudo sed -i 's=/sbin/upsmon -K >/dev/null 2>&1 && /sbin/upsdrvctl shutdown=#/sbin/upsmon -K >/dev/null 2>&1 && /sbin/upsdrvctl shutdown=' /lib/systemd/system-shutdown/nutshutdown
 
 echo_purple "Adding usb config"
-cat "$m_nut_usb_conf" | sudo tee -a /etc/nut/ups.conf
+cat "$m_nut_ups_conf" | sudo tee -a /etc/nut/ups.conf
 
 echo_purple "Starting service"
 sudo upsdrvctl start

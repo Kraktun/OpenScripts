@@ -1,21 +1,26 @@
-[tool.poetry]
+[project]
 name = "openscripts"
 version = "0.1.2"
 description = ""
-authors = ["Kraktun"]
+authors = [{ name = "Kraktun" }]
+requires-python = ">=3.12,<4"
 readme = "README.md"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-psutil = "^5.9.5"
-mutagen = "^1.46.0"
-click = "^8.1.7"
-emoji = "^2.8.0"
-pyyaml = "^6.0.1"
-pillow = "^10.3.0"
-pypiwin32 = "^223"
+dependencies = [
+    "click>=8.3.1",
+    "emoji>=2.15.0",
+    "mutagen>=1.47.0",
+    "pillow>=12.1.1",
+    "psutil>=7.2.2",
+    "pypiwin32>=223",
+    "pyyaml>=6.0.3",
+]
 
+[tool.uv]
+
+[tool.uv.build-backend]
+module-root = ""
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.9.25,<0.10.0"]
+build-backend = "uv_build"
